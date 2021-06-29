@@ -5,20 +5,16 @@
                     <use xlink:href="{{ asset('vendors/@coreui/icons/svg/free.svg#cil-speedometer') }}"></use>
                 </svg> Dashboard</a>
         </li>
-        <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="{{ route('clients') }}">
+
+        <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="{{ route('users_list') }}">
                 <svg class="c-sidebar-nav-icon">
                     <use xlink:href="{{ asset('vendors/@coreui/icons/svg/free.svg#cil-people') }}"></use>
-                </svg> Clients</a>
-        </li>
-        <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="{{ route('materials') }}">
-                <svg class="c-sidebar-nav-icon">
-                    <use xlink:href="{{ asset('vendors/@coreui/icons/svg/free.svg#cil-tv') }}"></use>
-                </svg> Materials</a>
-        </li>
-        <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="{{ route('access_rules') }}">
-                <svg class="c-sidebar-nav-icon">
-                    <use xlink:href="{{ asset('vendors/@coreui/icons/svg/free.svg#cil-speedometer') }}"></use>
                 </svg> Access Rules</a>
+        </li>
+        <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="{{ route('locations_ip_list') }}">
+                <svg class="c-sidebar-nav-icon">
+                    <use xlink:href="{{ asset('vendors/@coreui/icons/svg/free.svg#cil-rss') }}"></use>
+                </svg> IP List</a>
         </li>
     </ul>
     <button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent" data-class="c-sidebar-minimized"></button>

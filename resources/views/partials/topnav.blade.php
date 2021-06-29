@@ -36,9 +36,6 @@
                         <use xlink:href="{{ asset('vendors/@coreui/icons/svg/free.svg#cil-account-logout') }}"></use>
                     </svg>
                 </a>
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="">
-                    @csrf
-                </form>
             </li>
         </ul>
     </header>

@@ -19,16 +19,18 @@ Auth::routes();
 
 Route::group(['middleware' => 'auth'], function (){
     Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/clients', [\App\Http\Controllers\ClientController::class, 'index'])->name('clients');
-    Route::get('/clients/add', [\App\Http\Controllers\ClientController::class, 'create'])->name('create_client');
-    Route::post('/clients/add', [\App\Http\Controllers\ClientController::class, 'store'])->name('store_client');
-    Route::get('/materials', [\App\Http\Controllers\MaterialController::class, 'index'])->name('materials');
-    Route::get('/materials/add', [\App\Http\Controllers\MaterialController::class, 'create'])->name('create_material');
-    Route::post('/materials/add', [\App\Http\Controllers\MaterialController::class, 'store'])->name('store_material');
-    Route::get('access-rules', [\App\Http\Controllers\AccessRulesController::class, 'index'])->name('access_rules');
-    Route::post('access-rules/{user_id}', [\App\Http\Controllers\AccessRulesController::class, 'index'])->name('rst_user_token');
 
-    Route::post('user/reset_api_token', [\App\Http\Controllers\AccessRulesController::class, 'tokenReset'])->name('reset_api_token');
-    //Route::get('/static-repair', [\App\Http\Controllers\StaticRepairsController::index])->name('static-repair');
+    Route::group([
+            'name'      => 'admin.',
+            'prefix'    => 'admin',
+            'middleware'=> 'is_admin'
+        ], function(){
+        Route::get('locations/ip', [\App\Http\Controllers\admin\LocationIpsController::class, 'index'])->name('locations_ip_list');
+        Route::get('locations/ip/json', [\App\Http\Controllers\admin\LocationIpsController::class, 'list'])->name('locations_ip_list_json');
+        Route::get('user', [\App\Http\Controllers\admin\PyramidUsersController::class, 'index'])->name('users_list');
+        Route::get('user/{userId}', [\App\Http\Controllers\admin\PyramidUsersController::class, 'show'])->name('user_data');
+        //Route::post('user/{user_id}', [\App\Http\Controllers\admin\PyramidUsersController::class, 'store'])->name('add_user');
+        Route::post('user/copy', [\App\Http\Controllers\admin\PyramidUsersController::class, 'copyAction'])->name('copy_user');
+    });
 });
 
