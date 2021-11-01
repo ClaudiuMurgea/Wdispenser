@@ -10,9 +10,21 @@ use Illuminate\Http\Request;
 
 class   PyramidUsersController extends Controller
 {
-    public function index(Request $request){
+    public function index(Request $request, $selectedlocationId){
+        //$fromLocation = $request->get('from_location');
+
+        if($selectedlocationId == 0){
+            $currentLocationId = 1;
+        }
+        else{
+            $currentLocationId = $selectedlocationId;
+        }
+
+        //print_r($fromLocation);
+
         return view('layouts.admin.users')
             ->with('users', PyramidUser::all())
+            ->with('currentLocationId', $currentLocationId)
             ->with('locations', LocationMasterIp::orderBy('ServerType')->get()) ;
     }
 
@@ -38,19 +50,10 @@ class   PyramidUsersController extends Controller
 
         if(empty($selectedLocations) || empty($selectedUsers)) return redirect()->route('users_list');
 
-//        $params = [
-//            'driver' => 'mysql',
-//            'host' => '10.109.254.214', //
-//            'port' => 3306,
-//            'database' => 'Mystery',
-//            'username' => 'app',
-//            'password' => 'sau03magen'
-//        ];
-
         $mainDbParams = [
             'driver'    => 'mysql',
             'url'       => env('MASTER_DATABASE_URL'),
-            'host'      => env('MASTER_DB_HOST', '127.0.0.1'),
+            'host'      => env('SMASTER_DB_HOST', '127.0.0.1'),
             'port'      => env('MASTER_DB_PORT', '3306'),
             'database'  => env('MASTER_DB_DATABASE', 'forge'),
             'username'  => env('MASTER_DB_USERNAME', 'forge'),
@@ -113,25 +116,17 @@ class   PyramidUsersController extends Controller
                         $targetConn->table('lmi.AdminRestriction')->insert(
                             array(
                                 'AdminID'           => $insertedId,
-                                'Restriction'       => $_selectedUser['Restriction'],
-                                'RestrictionValue'  => $_selectedUser['RestrictionValue']
+                                'Restriction'       => $usrRestriction['Restriction'],
+                                'RestrictionValue'  => $usrRestriction['RestrictionValue']
                             ));
                     }
                 }
                 else{// update
-                    //
+                    // 1831
                 }
-
-
-                print_r($_selectedUser);
             }
-
-
         }
 
-
-        //print_r($locationsList); //print_r($selectedUsers);
-
-        return 'sadg'; //redirect()->route('users_list');
+        return redirect()->route('users_list');
     }
 }

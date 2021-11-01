@@ -5,8 +5,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
-    <title>{{ config('app.name', 'Thor project') }}</title>
+    <link rel="stylesheet" href="{{ asset('css/coreui.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/coreui-style.css') }}">
+    <title>{{ config('app.name', 'CMS web') }}</title>
 </head>
 <body class="c-app flex-row align-items-center">
     <div class="container">
@@ -22,7 +23,7 @@
             </div>
         </div>
     </div>
-    <script src="https://unpkg.com/@popperjs/core@2"></script>
-    <script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.min.js"></script>
+
+
 </body>
 </html>

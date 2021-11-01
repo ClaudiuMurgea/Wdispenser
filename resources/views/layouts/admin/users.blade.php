@@ -10,7 +10,7 @@
                 <span class="font-weight-bold">From location</span>
                 <select class="form-control input-group-sm" onchange="updateFromLocation(this)">
                     @foreach($locations as $location)
-                    <option value="{{ $location['LocationID'] }}">{{ $location['LocationName'] }} | {{ $location['IP'] }} | {{ $location['ServerType'] }}</option>
+                    <option value="{{ $location['LocationID'] }}" {{ $currentLocationId == $location['LocationID'] ? 'selected="selected"' : '' }}>{{ $location['IP'] }} | {{ $location['ServerType'] }} | {{ $location['LocationName'] }}</option>
                     @endforeach
                 </select>
             </div>
@@ -272,7 +272,12 @@
 @section('scripts')
     <script>
         function updateFromLocation(e){
-            console.log(e);
+            let selectedLocationId = e.value;
+
+            let url = '{{ route("users_list", ["locationId" => "::locationId"]) }}';
+            url = url.replace('::locationId', selectedLocationId);
+
+            window.location.assign(url);
         }
 
         function processAction(e){
@@ -284,7 +289,7 @@
 
                 $.ajax({
                     method: 'GET',
-                    url: 'locations/ip/json',
+                    url: '{{ URL::to("admin/locations/ip/json") }}',
                     headers: {
                         Accept: "application/json"
                     },
@@ -339,7 +344,7 @@
                 },
                 url: "user/copy",
                 data: JSON.stringify(formData),
-                success: () => window.location.assign("{{ route('users_list') }}"),
+                success: () => window.location.assign("{{ route('users_list', ['locationId' => 0]) }}"),
                 error: (response) => {
 
                 }
@@ -351,7 +356,7 @@
         function opeViewUserModal(userId, token){
             $.ajax({
                 method: 'GET',
-                url: 'user/'+userId,
+                url: 'show/' + userId,
                 headers: {
                     'X-CSRF-Token': token,
                     Accept: "application/json"
@@ -372,7 +377,7 @@
             })
         }
 
-        function opeEditUserModal(userId, token){
+        function openEditUserModal(userId, token){
             console.log(userId);
         }
 
