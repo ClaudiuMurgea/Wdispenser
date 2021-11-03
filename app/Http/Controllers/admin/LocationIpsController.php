@@ -53,6 +53,46 @@ class LocationIpsController extends Controller
         return response()->json($response);
     }
 
+    public function store(Request $request){
+        $forArray = [
+            'IP'            => $request['location_ip'] ?? null,
+            'LocationID'    => $request['location_id'] ?? null,
+            'LocationName'  => $request['location_name'] ?? null,
+            'ServerType'    => $request['server_type'] ?? 'slave',
+            'SubCompany'    => $request['sub_company'] ?? null
+        ];
+
+        $response = ['success' => false, 'message' => ''];
+
+        $formValid = true;
+        // form validation
+        foreach($forArray as $fieldName => $fieldValue){
+            if(empty($fieldValue) || $fieldValue == null){
+                $formValid = false;
+                $response['message'] = 'All fields are mandatory!';
+
+                break;
+            }
+        }
+
+        // end form validation
+
+        if($formValid){
+            try{
+                $insertActionState = LocationMasterIp::insert($forArray);
+
+                if($insertActionState){
+                    $response['success'] = true;
+                }
+            }
+            catch(\Throwable $e){
+                $response['message'] = $e->getMessage();
+            }
+        }
+        
+        return response()->json($response);
+    }
+
     private function getServerLocationData($serverIp){
         $serverData = ['success' => false];
 

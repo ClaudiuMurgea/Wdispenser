@@ -8,20 +8,20 @@
             <div class="modal-body">
                 <div class="card">
                     <div class="card-body">
-                        <form class="form-horizontal" action="#" method="post">
+                        <form class="form-horizontal" id="add_server_form" action="#" method="post">
                             @csrf
                             <div class="form-group">
                                 <label for="location_ip">IP</label>
-                                <input type="text" class="form-control" id="location_ip" placeholder="Location IP">
-                                <input type="button" class="btn btn-xs btn-warning" value="Validate">
+                                <input type="text" class="form-control" id="location_ip" name="location_ip" value="" placeholder="Location IP">
+                                {{-- <input type="button" class="btn btn-xs btn-warning" value="Validate"> --}}
                             </div>
                             <div class="form-group">
                                 <label for="location_id">Location ID</label>
-                                <input class="form-control" id="location_id" type="text" placeholder="Location ID">
+                                <input class="form-control" id="location_id" type="text" name="location_id" value="" placeholder="Location ID">
                             </div>
                             <div class="form-group">
                                 <label for="location_name">Location Name</label>
-                                <input class="form-control" id="location_name" type="text" placeholder="Location Name">
+                                <input class="form-control" id="location_name" type="text" name="location_name" value="" placeholder="Location Name">
                             </div>
                             <div class="form-group">
                                 <label for="server_type">Server Type</label>
@@ -33,7 +33,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="suyb_company">Sub Company</label>
-                                <input class="form-control" id="sub_company" type="text" placeholder="Sub Company">
+                                <input type="text" class="form-control" id="sub_company" name="sub_company" value="" placeholder="Sub Company">
                             </div>
                         </form>
                     </div>

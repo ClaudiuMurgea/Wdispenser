@@ -123,7 +123,6 @@
             // }
         }
 
-
         function privateAlert(){
             toastr.options.timeOut = 5000;
             toastr.options.positionClass = 'toast-top-center'
@@ -131,7 +130,46 @@
         }
 
         function addNewServer(){
-            
+
+        }
+
+        function addNewServer(){
+            let formData = $("#add_server_form").serializeArray();
+
+            let formDataObj = {};
+            $.each(formData, function(key, input){
+                formDataObj[input.name] = input.value;
+            });
+
+            $.ajax({
+                method: "POST",
+                url: "ip/store",
+                data: formDataObj,
+                dataType: 'json',
+                beforeSend: function(){
+                    showLoadingOverlay();
+                },
+                success: function(data){
+                    if(data.success){
+                        window.location.assign('{{ route("locations_ip_list") }}');
+                    }
+                    else{
+                        toastr.options.timeOut = 5000;
+                        toastr.options.positionClass = 'toast-top-center'
+                        toastr.error(data.message, 'Error:');
+
+                        hideLoadingOverlay();
+                    }
+                    
+                },
+                error: function(){
+
+                    hideLoadingOverlay();
+                }
+            });
+
+
+            console.log('save', formDataObj);
         }
     </script>
 @endsection

@@ -28,6 +28,7 @@ Route::group(['middleware' => 'auth'], function (){
         Route::get('locations/ip', [\App\Http\Controllers\admin\LocationIpsController::class, 'index'])->name('locations_ip_list');
         Route::get('locations/ip/json', [\App\Http\Controllers\admin\LocationIpsController::class, 'list'])->name('locations_ip_list_json');
         Route::post('locations/ip/validate', [\App\Http\Controllers\admin\LocationIpsController::class, 'validateIp'])->name('validate_ip_address');
+        Route::post('locations/ip/store', [\App\Http\Controllers\admin\LocationIpsController::class, 'store'])->name('store_ip_address');
         // Route::get('user', [\App\Http\Controllers\admin\PyramidUsersController::class, 'index'])->name('users_list');
         Route::get('user/{locationId}', [\App\Http\Controllers\admin\PyramidUsersController::class, 'index'])->name('users_list');
         Route::get('user/show/{userId}', [\App\Http\Controllers\admin\PyramidUsersController::class, 'show'])->name('user_data');
