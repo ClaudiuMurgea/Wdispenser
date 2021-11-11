@@ -10,7 +10,7 @@
                 <span class="font-weight-bold">From location</span>
                 <select class="form-control input-group-sm" onchange="updateFromLocation(this)">
                     @foreach($locations as $location)
-                    <option value="{{ $location['LocationID'] }}" {{ $currentLocationId == $location['LocationID'] ? 'selected="selected"' : '' }}>{{ $location['IP'] }} | {{ $location['ServerType'] }} | {{ $location['LocationName'] }}</option>
+                    <option value="{{ $location['LocationID'] }}" id="selected_location_id" {{ $currentLocationId == $location['LocationID'] ? 'selected="selected"' : '' }}>{{ $location['IP'] }} | {{ $location['ServerType'] }} | {{ $location['LocationName'] }}</option>
                     @endforeach
                 </select>
             </div>
@@ -60,9 +60,9 @@
                             </td>
                             <td>
                                 <div class="btn-group btn-group-lg btn-group-sm mb-3">
-                                    <input type="button" class="btn btn-sm btn-success" value="View" data-id="show_{{ $user['ID'] }}" data-toggle="modal" data-target="#showUserModal" onclick="opeViewUserModal({{ $user['ID'] }}, '{{ csrf_token() }}')">
-                                    <input type="button" class="btn btn-sm btn-warning" value="Edit" data-id="edit_{{ $user['ID'] }}" data-toggle="modal" data-target="#editUserModal" onclick="opeEditUserModal({{ $user['ID'] }}, '{{ csrf_token() }}')">
-                                    <input type="button" class="btn btn-sm btn-danger" value="Access Rules">
+                                    <input type="button" class="btn btn-sm btn-success" value="View" data-id="show_{{ $user['ID'] }}" data-toggle="modal" data-target="#showUserModal" onclick="openViewUserModal({{ $user['ID'] }}, '{{ csrf_token() }}')">
+                                    <input type="button" class="btn btn-sm btn-warning" value="Edit" data-id="edit_{{ $user['ID'] }}" data-toggle="modal" data-target="#editUserModal" onclick="openEditUserModal({{ $user['ID'] }}, '{{ csrf_token() }}')">
+                                    <input type="button" class="btn btn-sm btn-danger" value="Access Rules" data-id="rules_{{ $user['ID'] }}" data-toggle="modal" data-target="#accessRulesModal" onclick="openAccessRulesModal({{ $user['ID'] }}, '{{ csrf_token() }}')">
                                 </div>
                             </td>
                         </tr>
@@ -71,64 +71,7 @@
             </tbody>
         </table>
     </div>
-    <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModal" style="display: none;" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Add user</h4>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-                </div>
-                <div class="modal-body">
-                    <div class="card">
-                        <div class="card-body">
-                            <form class="form-horizontal" action="#" method="post">
-                                <div class="form-group">
-                                    <label for="user_name">Username</label>
-                                    <input class="form-control" id="user_name" type="text" placeholder="Username">
-                                </div>
-                                <div class="form-group">
-                                    <label for="first_name">First Name</label>
-                                    <input class="form-control" id="first_name" type="text" placeholder="First Name">
-                                </div>
-                                <div class="form-group">
-                                    <label for="last_name">Last Name</label>
-                                    <input class="form-control" id="last_name" type="text" placeholder="Last Name">
-                                </div>
-                                <div class="form-group">
-                                    <label for="user_phone">Mobile</label>
-                                    <input class="form-control" id="user_phone" type="text" placeholder="Mobile">
-                                </div>
-                                <div class="form-group">
-                                    <label for="user_email">Email</label>
-                                    <input class="form-control" id="user_email" type="text" placeholder="Email">
-                                </div>
-                                <div class="form-group">
-                                    <label for="mac_address">MAC</label>
-                                    <input class="form-control" id="mac_address" type="text" placeholder="MAC">
-                                </div>
-                                <div class="form-group">
-                                    <label for="can_log_back">Can Log Back</label>
-                                    <select class="form-control" id="select1" name="select1">
-                                        <option value="null">Please select</option>
-                                        <option value="Yes">Yes</option>
-                                        <option value="No">No</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="user_card">Card</label>
-                                    <input class="form-control" id="user_card" type="text" placeholder="Card">
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-sm btn-secondary" type="button" data-dismiss="modal">Close</button>
-                    <button class="btn btn-sm btn-success" type="button">Save User</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    @include('modals.user_add_modal');
     <div class="modal fade" id="showUserModal" tabindex="-1" aria-labelledby="showUserModal" style="display: none;" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -241,6 +184,8 @@
         </div>
     </div>
 
+    @include('modals.access_rules_modal');
+
 {{--    user copy modal --}}
     <div class="modal fade" id="copyUserModal" tabindex="-1" aria-labelledby="copyUserModal" style="display: none;" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -334,7 +279,7 @@
             let formData = $("#copyUserForm").serializeArray();
             let token = $("#copyUserForm input[name=_token]").val();
 
-            console.log(JSON.stringify(formData));
+            //console.log(JSON.stringify(formData));
 
             $.ajax({
                 method: "POST",
@@ -353,7 +298,7 @@
 
         }
 
-        function opeViewUserModal(userId, token){
+        function openViewUserModal(userId, token){
             $.ajax({
                 method: 'GET',
                 url: 'show/' + userId,
@@ -379,6 +324,66 @@
 
         function openEditUserModal(userId, token){
             console.log(userId);
+        }
+
+        function openAccessRulesModal(userId, token){
+
+
+            let locationId = $("#selected_location_id").val();
+            console.log(locationId);
+            let url = "access_rules/" + userId + '/' + locationId;
+
+            $.ajax({
+                method: "GET",
+                headers: {
+                    Accept: "application/json"
+                },
+                url: url,
+                success: (response) => {
+                    // console.log(response);
+                },
+                error: (response) => {
+                    // console.error(response);
+                }
+            })
+        }
+
+        function saveNewUser(serverId){
+            let formData = $("#user_add_form").serializeArray();
+
+            $.ajax({
+                method: "POST",
+                headers: {
+                    Accept: "application/json"
+                },
+                url: '{{ route("add_user") }}',
+                data: formData,
+                success: (response) => {
+                    console.log(response);
+
+                    if(response.status){
+                        toastr.options.timeOut = 5000;
+                        toastr.options.positionClass = 'toast-top-center';
+                        toastr.success('User recorded!', 'Succes:');
+                    }
+                    else{
+                        toastr.options.timeOut = 5000;
+                        toastr.options.positionClass = 'toast-top-center';
+                        toastr.error('Server error: ', 'Error:');
+                    }
+
+                    //  window.location.assign('{{ route("users_list", ["locationId" => "0"]) }}')
+                },
+                error: (response) => {
+                    console.log(response);
+                    
+                    toastr.options.timeOut = 5000;
+                    toastr.options.positionClass = 'toast-top-center';
+                    toastr.error('Server error!', 'Error:');
+                }
+            })
+
+            console.log(formData);
         }
 
         $('#registerForm').submit(function (e) {

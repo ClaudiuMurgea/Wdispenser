@@ -6,30 +6,116 @@ use App\Helpers\DatabaseConnection;
 use App\Http\Controllers\Controller;
 use App\Models\LocationMasterIp;
 use App\Models\PyramidUser;
+use App\Models\RestrictionList;
 use Illuminate\Http\Request;
 
 class   PyramidUsersController extends Controller
 {
     public function index(Request $request, $selectedlocationId){
-        //$fromLocation = $request->get('from_location');
+        $selectedLocationData = [
+            'location_ip'   => '',
+            'server_type'   => '',
+            'location_name' => ''
+        ];
 
-        if($selectedlocationId == 0){
-            $currentLocationId = 1;
+        if($selectedlocationId == 0){ // search for master location
+            $masterLocation = $this->getMasterLocation()[0] ?? [];
+
+            if(!empty($masterLocation)){// master found
+                $currentLocationId = $masterLocation['LocationID'] ?? 0;
+                $selectedLocationData = [
+                    'location_ip'   => $masterLocation['IP'],
+                    'server_type'   => $masterLocation['ServerType'],
+                    'location_name' => $masterLocation['LocationName']
+                ];
+            }
+            else{// no master, probably slave server, get first record found
+                $locationData = LocationMasterIp::orderBy('ServerType')->get()->toArray()[0] ?? [];
+
+                if(!empty($locationData)){// slave found
+                    $currentLocationId = $locationData['LocationID'] ?? 0;
+                    $selectedLocationData = [
+                        'location_ip'   => $locationData['IP'],
+                        'server_type'   => $locationData['ServerType'],
+                        'location_name' => $locationData['LocationName']
+                    ];
+                }
+                else{// empty list, not recorded yet
+                }
+            }
         }
-        else{
+        else{// get location data
+            $locationData = LocationMasterIp::where('LocationID', $selectedlocationId)->get()->toArray()[0] ?? [];
             $currentLocationId = $selectedlocationId;
+            $selectedLocationData = [
+                'location_ip'   => $locationData['IP'],
+                'server_type'   => $locationData['ServerType'],
+                'location_name' => $locationData['LocationName']
+            ];
         }
 
-        //print_r($fromLocation);
+        $usersList = [];
+
+        $usersList = PyramidUser::all();
+
+        $locationsList = LocationMasterIp::orderBy('ServerType')->get();
 
         return view('layouts.admin.users')
-            ->with('users', PyramidUser::all())
+            ->with('selectedLocationData', $selectedLocationData)
+            ->with('users', $usersList)
             ->with('currentLocationId', $currentLocationId)
-            ->with('locations', LocationMasterIp::orderBy('ServerType')->get()) ;
+            ->with('locations', $locationsList) ;
     }
 
     public function show($id){
         return PyramidUser::find($id);
+    }
+
+    public function store(Request $request){
+        $response = ['success' => false, 'message' => ''];
+
+        $forArray = [
+            'Login'     => $request['user_name'] ?? null,
+            'Password'  => $request['user_password'] ?? null,
+            'FirstName' => $request['first_name'] ?? null,
+            'LastName'  => $request['last_name'] ?? null,
+            'Mobile'    => $request['user_phone'] ?? null,
+            'Email'     => $request['user_email'] ?? null,
+            'MAC'       => $request['mac_address'] ?? null,
+            'CanLogBack'=> $request['can_log_back'] ?? null,
+            'Card'      => $request['user_card'] ?? null,
+            //'Mobile'    => $request['user_phone'] ?? null,
+        ];
+
+        $response = ['success' => false, 'message' => ''];
+
+        $formValid = true;
+        // form validation
+        // foreach($forArray as $fieldName => $fieldValue){
+        //     if(empty($fieldValue) || $fieldValue == null){
+        //         $formValid = false;
+        //         $response['message'] = 'All fields are mandatory!';
+
+        //         break;
+        //     }
+        // }
+
+        // end form validation
+
+        if($formValid){
+            try{
+                $insertActionState = PyramidUser::insert($forArray);
+
+                if($insertActionState){
+                    $response['success'] = true;
+                }
+            }
+            catch(\Throwable $e){
+                $response['message'] = $e->getMessage();
+            }
+        }
+        
+        return response()->json($response);
     }
 
     public function copyAction(Request $request){
@@ -128,5 +214,20 @@ class   PyramidUsersController extends Controller
         }
 
         return redirect()->route('users_list');
+    }
+
+    public function accessRulesShow($userId, $locationId){
+        // $restrictionListModel = new RestrictionList();
+        // $restrictionListModel->setConnection('mysql_main');
+
+        $accessRulesList = (new RestrictionList())->on('mysql_main')->get()->toArray();
+
+        // print_r($accessRulesList);
+
+
+    }
+
+    private function getMasterLocation(){
+        return LocationMasterIp::where('ServerType', 'Master')->get()->toArray();
     }
 }

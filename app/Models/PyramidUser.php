@@ -9,6 +9,7 @@ class PyramidUser extends Model
 {
     use HasFactory;
 
+    protected $connection = 'mysql_main';
     protected $table = 'lmi.AdminInfo';
 
     protected $fillable = [

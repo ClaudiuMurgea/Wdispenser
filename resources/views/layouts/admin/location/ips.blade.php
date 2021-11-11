@@ -87,8 +87,8 @@
                         }
                         else{
                             toastr.options.timeOut = 5000;
-                            toastr.options.positionClass = 'toast-top-center'
-                            toastr.error(data.message, 'Error:')
+                            toastr.options.positionClass = 'toast-top-center';
+                            toastr.error(data.message, 'Error:');
                             return false;
                         }
                     },
