@@ -35,6 +35,7 @@ Route::group(['middleware' => 'auth'], function (){
         Route::post('user', [\App\Http\Controllers\admin\PyramidUsersController::class, 'store'])->name('add_user');
         Route::post('user/copy', [\App\Http\Controllers\admin\PyramidUsersController::class, 'copyAction'])->name('copy_user');
         Route::get('user/access_rules/{userId}/{locationId}', [\App\Http\Controllers\admin\PyramidUsersController::class, 'accessRulesShow'])->name('access_rules_list');
+        Route::post('user/access_rules/{userId}/{locationId}', [\App\Http\Controllers\admin\PyramidUsersController::class, 'accessRulesStore'])->name('add_user_restrictions');
     });
 });
 

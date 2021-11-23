@@ -11,17 +11,14 @@
                         <form class="form-horizontal" id="access_rules_form" action="#" method="post">
                             @csrf
 
-                            <div class="form-group">
-                                <label for="location_ip">IP</label>
-                                <input type="text" class="form-control" id="location_ip" name="location_ip" value="" placeholder="Location IP">
-                            </div>
+                            <div id="accessRulesRoot"></div>
                         </form>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer" id="accessRulesModalFooter">
                 <button class="btn btn-sm btn-secondary" type="button" data-dismiss="modal">Close</button>
-                <button class="btn btn-sm btn-success" type="button" onclick="">Save IP</button>
+                <button class="btn btn-sm btn-success" type="button" onclick="saveUserRestrictions()">Save Restrictions</button>
             </div>
         </div>
     </div>

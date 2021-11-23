@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Helpers\DatabaseConnection;
 use App\Http\Controllers\Controller;
+use App\Models\AdminRestriction;
 use App\Models\LocationMasterIp;
 use App\Models\PyramidUser;
 use App\Models\RestrictionList;
@@ -217,17 +218,94 @@ class   PyramidUsersController extends Controller
     }
 
     public function accessRulesShow($userId, $locationId){
-        // $restrictionListModel = new RestrictionList();
-        // $restrictionListModel->setConnection('mysql_main');
+        $accessRulessTree = [];
 
         $accessRulesList = (new RestrictionList())->on('mysql_main')->get()->toArray();
+        $userRestrictions = (new AdminRestriction())
+            ->where('AdminID', $userId)
+            ->get()
+            ->mapWithKeys(function($item){ return [$item['Restriction'] => $item['RestrictionValue']]; })
+            ->toArray();
 
-        // print_r($accessRulesList);
+        if(!empty($accessRulesList)){
+            foreach($accessRulesList as $accessRule){
+                $children = explode("/", $accessRule['Restriction']);
+                $isRoot = count($children) == 1;
 
+                $name = array_pop($children);
 
+                // $accessRule['children'] = [];
+                $accessRule['r_name'] = $name;
+                $accessRule['f_name'] = strtolower(str_replace('/', '', str_replace(' ', '', $accessRule['Restriction'])));
+                $accessRule['UserValue'] = $userRestrictions[$accessRule['Restriction']] ?? '';
+                $accessRule['additional'] = explode(",", $accessRule['Additional']);
+                // Parinte - de la primul nivel
+                if ($isRoot) {
+                    $accessRulessTree[$name] = $accessRule;
+                // Copil - peste nivelul 1
+                } else {
+                    $children[] = $name;
+                    $key = implode('.children.', $children);
+
+                    \Arr::set($accessRulessTree, $key, $accessRule);
+                }
+            }
+        }
+
+        return response()->json($accessRulessTree);
+    }
+
+    public function accessRulesStore(Request $request, $userId, $locationId){
+        $selectedRestrictions = $request->all();
+        $accessRulesList = (new RestrictionList())->on('mysql_main')->get()->toArray();
+
+        // get full locations list from master
+        $locationsList = LocationMasterIp::all()->keyBy('LocationID')->toArray();
+
+        // get target location details from main server database
+        $params = [
+            'driver' => 'mysql',
+            'host' => $locationsList[$locationId]['IP'],
+            'port' => 3306,
+            'database' => env('MASTER_DB_DATABASE', 'Mystery'),
+            'username' => env('MASTER_DB_USERNAME', 'app'),
+            'password' => env('MASTER_DB_PASSWORD', 'sau03magen')
+        ];
+        $targetConn = DatabaseConnection::setConnection($params);
+
+        $userRestrictions = [];
+        if(!empty($accessRulesList)){
+            // remove existent restrictions
+            $targetConn->table('lmi.AdminRestriction')->where('AdminID', $userId)->delete();
+
+            foreach($accessRulesList as $accessRule){
+                $searchKey = strtolower(str_replace('/', '', str_replace(' ', '', $accessRule['Restriction'])));
+                if($accessRule['Type'] == 'ShowHide'){
+                    $usersRestriction = 'Hide';
+                    if(isset($selectedRestrictions[$searchKey])) $usersRestriction = 'Show';
+                }
+                elseif($accessRule['Type'] == 'Choice'){
+                    $usersRestriction = '';
+                }
+                elseif($accessRule['Type'] == 'CheckList'){
+                    $usersRestriction = '';
+                }
+
+                $userRestrictions[] = [
+                    'AdminID'           => $userId,
+                    'Restriction'       => $accessRule['Restriction'],
+                    'RestrictionValue'  => $usersRestriction
+                ];
+            }
+
+            $targetConn->table('lmi.AdminRestriction')->insert($userRestrictions);
+        }
+
+        return response()->json(['status' => true]);
     }
 
     private function getMasterLocation(){
         return LocationMasterIp::where('ServerType', 'Master')->get()->toArray();
     }
+
 }

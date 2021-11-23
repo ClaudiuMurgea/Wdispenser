@@ -8,9 +8,9 @@
         <div class="row">
             <div class="d-lg-table-cell col-sm-6">
                 <span class="font-weight-bold">From location</span>
-                <select class="form-control input-group-sm" onchange="updateFromLocation(this)">
+                <select class="form-control input-group-sm" id="selected_location_id" onchange="updateFromLocation(this)">
                     @foreach($locations as $location)
-                    <option value="{{ $location['LocationID'] }}" id="selected_location_id" {{ $currentLocationId == $location['LocationID'] ? 'selected="selected"' : '' }}>{{ $location['IP'] }} | {{ $location['ServerType'] }} | {{ $location['LocationName'] }}</option>
+                    <option value="{{ $location['LocationID'] }}" {{ $currentLocationId == $location['LocationID'] ? 'selected="selected"' : '' }}>{{ $location['IP'] }} | {{ $location['ServerType'] }} | {{ $location['LocationName'] }}</option>
                     @endforeach
                 </select>
             </div>
@@ -327,10 +327,7 @@
         }
 
         function openAccessRulesModal(userId, token){
-
-
             let locationId = $("#selected_location_id").val();
-            console.log(locationId);
             let url = "access_rules/" + userId + '/' + locationId;
 
             $.ajax({
@@ -340,12 +337,206 @@
                 },
                 url: url,
                 success: (response) => {
-                    // console.log(response);
+                    //console.log(response);
+
+                    let accessRulesHtml = '';
+
+                    accessRulesHtml = buildTreeMenu(response, accessRulesHtml);
+
+                    $("#accessRulesRoot").html(accessRulesHtml);
+
+                    activateTreemenu();
+
+                    
+                    $('<input>').attr({type: 'hidden', id: 'hUserId', name: 'userId', value: userId}).appendTo('#accessRulesModalFooter');
+                    $('<input>').attr({type: 'hidden', id: 'hLocationId', name: 'locationId', value: locationId}).appendTo('#accessRulesModalFooter');
                 },
                 error: (response) => {
-                    // console.error(response);
+                    console.error(response);
                 }
             })
+        }
+
+        function activateTreemenu(){
+            var toggler = document.getElementsByClassName("caret");
+            var i;
+
+            for (i = 0; i < toggler.length; i++) {
+                toggler[i].addEventListener("click", function() {
+                    this.parentElement.querySelector(".nested").classList.toggle("active");
+                    this.classList.toggle("caret-down");
+                });
+            }
+        }
+
+        function buildTreeMenu(data, tree) {
+            if (Object.keys(data).length > 0) {
+                if(tree == ''){
+                    tree += '<ul id="accessRulesList">';
+                }
+                else{
+                    tree += '<ul class="nested">';
+                }
+                    $.each(data, function(key, value){
+                        if(typeof value.children !== 'undefined'){
+                            if(value.Type == 'ShowHide'){ // checkbox
+                                if(value.UserValue == ''){// user restriction not set -> unchecked
+                                    tree += '<li>';
+                                        tree += '<span class="caret"></span>';
+                                        tree += '<input type="checkbox" name="' + value.f_name + '" /> ';
+                                        tree += '<span title="' + value.Help + '" style="color: red">' + value.r_name + '</span>';
+                                }
+                                else{
+                                    if(value.UserValue == 'Show'){
+                                        tree += '<li>';
+                                            tree += '<span class="caret"></span>';
+                                            tree += '<input type="checkbox" checked="checked" name="' + value.f_name + '" /> ' + value.r_name + '';
+                                    }
+                                    else{
+                                        tree += '<li>';
+                                        tree += '<span class="caret"></span>';
+                                        tree += '<input type="checkbox" name="' + value.f_name + '" /> ' + value.r_name + '';
+                                    }
+                                }
+                            }
+                            else if(value.Type == 'CheckList'){// multiple cb`s
+                                console.log(value);
+                            }
+                            else if(value.Type == 'Choice'){ // select
+                                if(value.UserValue == ''){// user restriction not set
+                                console.log(value);
+                                    tree += '<li>';
+                                        tree += '<li>';
+                                        tree += '<span class="caret"></span>';
+                                        tree += ' <span color="red">' + value.r_name + '</span>';
+                                        tree += '<ul><select name="' + value.f_name + '">';
+                                        tree += '<option value="null" >Select</option>';
+                                        $.each(value.additional, function(k, aditional){
+                                            if(value.DefaultValue == aditional){
+                                                tree += '<option selected="selected" value="'+aditional+'">' + aditional + '</option>';
+                                            }
+                                            else{
+                                                tree += '<option value="'+aditional+'">' + aditional + '</option>';
+                                            }
+                                        });
+                                        tree += '</select></ul>';
+                                }
+                                else{
+                                    tree += '<li>';
+                                        tree += '<span class="caret"></span>';
+                                        tree += ' <span>' + value.r_name + '</span>';
+                                        tree += '<ul><select name="' + value.f_name + '">';
+                                        tree += '<option value="null" >Select</option>';
+                                        $.each(value.additional, function(k, aditional){
+                                            if(value.UserValue == aditional){
+                                                tree += '<option selected="selected" value="'+aditional+'">' + aditional + '</option>';
+                                            }
+                                            else{
+                                                tree += '<option value="'+aditional+'">' + aditional + '</option>';
+                                            }
+                                        });
+                                        tree += '</select></ul>';
+                                }
+                            }
+
+                            tree = buildTreeMenu(value.children, tree);
+                        }
+                        else{// no children
+                            if(value.Type == 'ShowHide'){ // checkbox
+                                if(value.UserValue == ''){// user restriction not set
+                                    tree += '<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+                                    tree += '<input type="checkbox" name="' + value.f_name + '" /> ';
+                                    tree += '<span title="' + value.Help + '" style="color: red">' + value.r_name + '</span>';
+                                }
+                                else{
+                                    if(value.UserValue == 'Show'){ // use user
+                                        tree += '<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+                                        tree += '<input type="checkbox" checked="checked" name="' + value.f_name + '" /> ';
+                                        tree += '<span title="' + value.Help + '">' + value.r_name + '</span>';
+                                    }
+                                    else{
+                                        tree += '<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+                                        tree += '<input type="checkbox" name="' + value.f_name + '" /> ';
+                                        tree += '<span title="' + value.Help + '">' + value.r_name + '</span>';
+                                    }
+                                }
+                            }
+                            else if(value.Type == 'CheckList'){ // checkbox
+                                tree += '<ul>';
+                                if(value.UserValue == '' && false){// user restriction not set
+                                    $.each(value.additional, function(k, aditional){
+                                        tree += '<li>';
+                                            tree += '<input type="checkbox" name="' + value.f_name + '" value="' + aditional + '" /> ';
+                                            tree += aditional;
+                                        tree += '</li>';
+                                    });
+                                }
+                                else{
+                                    $.each(value.additional, function(k, aditional){
+                                        tree += '<li>';
+                                            tree += '<input type="checkbox" id="' + value.f_name + aditional + '" name="' + value.f_name + '[]" value="' + aditional + '" /> ';
+                                            tree += '<label style="margin-bottom:0; cursor:pointer" for="' + value.f_name + aditional + '">' + aditional + '</label>';
+                                        tree += '</li>';
+                                    });
+                                }
+                                tree += '</ul>';
+                            }
+                            else if(value.Type == 'Choice'){ // select
+                                
+                            }
+                        }
+
+                        tree += '</li>';
+                    });
+                tree += '</ul>';
+            }
+
+            return tree;
+        }
+
+        function saveUserRestrictions(){
+            let formData = $("#access_rules_form").serializeArray();
+            let userId = $("#hUserId").val();
+            let locationId = $("#hLocationId").val();
+
+            let url = "access_rules/" + userId + '/' + locationId;
+
+            $.ajax({
+                method: "POST",
+                headers: {
+                    Accept: "application/json"
+                },
+                beforeSend: function(){
+                    showLoadingOverlay();
+                },
+                url: url,
+                data: formData,
+                success: (response) => {
+                    console.log(response);
+
+                    if(response.status){
+                        toastr.options.timeOut = 5000;
+                        toastr.options.positionClass = 'toast-top-center';
+                        toastr.success('User restriction updated!', 'Succes:');
+                    }
+                    else{
+                        toastr.options.timeOut = 5000;
+                        toastr.options.positionClass = 'toast-top-center';
+                        toastr.error('Server error: ', 'Error:');
+                    }
+
+                    window.location.assign('{{ route("users_list", ["locationId" => "0"]) }}')
+                },
+                error: (response) => {
+                    console.log(response);
+                    
+                    toastr.options.timeOut = 5000;
+                    toastr.options.positionClass = 'toast-top-center';
+                    toastr.error('Server error!', 'Error:');
+                }
+            });
+
+            console.log(formData);
         }
 
         function saveNewUser(serverId){
@@ -381,7 +572,7 @@
                     toastr.options.positionClass = 'toast-top-center';
                     toastr.error('Server error!', 'Error:');
                 }
-            })
+            });
 
             console.log(formData);
         }
