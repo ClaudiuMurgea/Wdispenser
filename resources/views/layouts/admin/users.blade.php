@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container-fluid">
-        <button class="btn btn-success mb-1" type="button" data-toggle="modal" data-target="#addUserModal">Add user</button>
+        <button class="btn btn-success mb-1" type="button" data-toggle="modal" data-target="#addUserModal" onclick="clearUserAddForm()">Add user</button>
     </div>
     <div class="container container-fluid">
         <div class="row">
@@ -46,23 +46,23 @@
                     @csrf
                     @foreach($users as $user)
                         <tr>
-                            <td>{{ $user['Login'] }}</td>
-                            <td>{{ $user['FirstName'] }}</td>
-                            <td>{{ $user['LastName'] }}</td>
-                            <td>{{ $user['Mobile'] }}</td>
-                            <td>{{ $user['Email'] }}</td>
-                            <td>{{ $user['MAC'] }}</td>
-                            <td>{{ $user['CanLogBack'] }}</td>
-                            <td>{{ $user['Card'] }}</td>
-                            <td>{{ $user['Position'] }}</td>
+                            <td>{{ $user->Login }}</td>
+                            <td>{{ $user->FirstName }}</td>
+                            <td>{{ $user->LastName }}</td>
+                            <td>{{ $user->Mobile }}</td>
+                            <td>{{ $user->Email }}</td>
+                            <td>{{ $user->MAC }}</td>
+                            <td>{{ $user->CanLogBack }}</td>
+                            <td>{{ $user->Card }}</td>
+                            <td>{{ $user->Position }}</td>
                             <td>
-                                <input type="checkbox" class="form-check" name="user_{{ $user['ID'] }}" value="{{ $user['ID'] }}">
+                                <input type="checkbox" class="form-check" name="user_{{ $user->ID }}" value="{{ $user->ID }}">
                             </td>
                             <td>
                                 <div class="btn-group btn-group-lg btn-group-sm mb-3">
-                                    <input type="button" class="btn btn-sm btn-success" value="View" data-id="show_{{ $user['ID'] }}" data-toggle="modal" data-target="#showUserModal" onclick="openViewUserModal({{ $user['ID'] }}, '{{ csrf_token() }}')">
-                                    <input type="button" class="btn btn-sm btn-warning" value="Edit" data-id="edit_{{ $user['ID'] }}" data-toggle="modal" data-target="#editUserModal" onclick="openEditUserModal({{ $user['ID'] }}, '{{ csrf_token() }}')">
-                                    <input type="button" class="btn btn-sm btn-danger" value="Access Rules" data-id="rules_{{ $user['ID'] }}" data-toggle="modal" data-target="#accessRulesModal" onclick="openAccessRulesModal({{ $user['ID'] }}, '{{ csrf_token() }}')">
+                                    <input type="button" class="btn btn-sm btn-success" value="View" data-id="show_{{ $user->ID }}" data-toggle="modal" data-target="#viewUserModal" onclick="openViewUserModal({{ $user->ID }}, '{{ csrf_token() }}')">
+                                    <input type="button" class="btn btn-sm btn-warning" value="Edit" data-id="edit_{{ $user->ID }}" data-toggle="modal" data-target="#editUserModal" onclick="openEditUserModal({{ $user->ID }}, '{{ csrf_token() }}')">
+                                    <input type="button" class="btn btn-sm btn-danger" value="Access Rules" data-id="rules_{{ $user->ID }}" data-toggle="modal" data-target="#accessRulesModal" onclick="openAccessRulesModal({{ $user->ID }}, '{{ csrf_token() }}')">
                                 </div>
                             </td>
                         </tr>
@@ -71,120 +71,10 @@
             </tbody>
         </table>
     </div>
-    @include('modals.user_add_modal');
-    <div class="modal fade" id="showUserModal" tabindex="-1" aria-labelledby="showUserModal" style="display: none;" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Show user</h4>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-                </div>
-                <div class="modal-body">
-                    <div class="card">
-                        <div class="card-body">
-                            <form method="POST" action="#">
-                                <div class="form-group">
-                                    <label for="show_user_name">Login</label>
-                                    <span class="form-control" id="show_user_name" ></span>
-                                </div>
-                                <div class="form-group">
-                                    <label for="show_first_name">First Name</label>
-                                    <span class="form-control" id="show_first_name"></span>
-                                </div>
-                                <div class="form-group">
-                                    <label for="show_last_name">Last Name</label>
-                                    <span class="form-control" id="show_last_name"></span>
-                                </div>
-                                <div class="form-group">
-                                    <label for="show_user_phone">Mobile</label>
-                                    <span class="form-control" id="show_user_phone"></span>
-                                </div>
-                                <div class="form-group">
-                                    <label for="show_user_email">Email</label>
-                                    <span class="form-control" id="show_user_email"></span>
-                                </div>
-                                <div class="form-group">
-                                    <label for="show_mac_address">MAC</label>
-                                    <span class="form-control" id="show_mac_address"></span>
-                                </div>
-                                <div class="form-group">
-                                    <label for="show_can_log_back">Can Log Back</label>
-                                    <span class="form-control" id="show_can_log_back"></span>
-                                </div>
-                                <div class="form-group">
-                                    <label for="show_user_card">Card</label>
-                                    <span class="form-control" id="show_user_card"></span>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModal" style="display: none;" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Edit user</h4>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-                </div>
-                <div class="modal-body">
-                    <div class="card">
-                        <div class="card-body">
-                            <form class="form-horizontal" action="#" id="editUserForm" method="POST">
-                                <div class="form-group">
-                                    <label for="edit_user_name">Username</label>
-                                    <input class="form-control" id="edit_user_name" type="text" placeholder="Username">
-                                </div>
-                                <div class="form-group">
-                                    <label for="edit_first_name">First Name</label>
-                                    <input class="form-control" id="edit_first_name" type="text" placeholder="First Name">
-                                </div>
-                                <div class="form-group">
-                                    <label for="edit_last_name">Last Name</label>
-                                    <input class="form-control" id="edit_last_name" type="text" placeholder="Last Name">
-                                </div>
-                                <div class="form-group">
-                                    <label for="edit_user_phone">Mobile</label>
-                                    <input class="form-control" id="edit_user_phone" type="text" placeholder="Mobile">
-                                </div>
-                                <div class="form-group">
-                                    <label for="edit_user_email">Email</label>
-                                    <input class="form-control" id="edit_user_email" type="text" placeholder="Email">
-                                </div>
-                                <div class="form-group">
-                                    <label for="edit_mac_address">MAC</label>
-                                    <input class="form-control" id="edit_mac_address" type="text" placeholder="MAC">
-                                </div>
-                                <div class="form-group">
-                                    <label for="edit_can_log_back">Can Log Back</label>
-                                    <select class="form-control" id="edit_can_log_back" name="select1">
-                                        <option value="null">Please select</option>
-                                        <option value="Yes">Yes</option>
-                                        <option value="No">No</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="edit_user_card">Card</label>
-                                    <input class="form-control" id="edit_user_card" type="text" placeholder="Card">
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
-                    <button class="btn btn-primary" type="button">Save changes</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    @include('modals.access_rules_modal');
+    @include('modals.user_add_modal')
+    @include('modals.user_view_modal')
+    @include('modals.user_edit_modal')
+    @include('modals.access_rules_modal')
 
 {{--    user copy modal --}}
     <div class="modal fade" id="copyUserModal" tabindex="-1" aria-labelledby="copyUserModal" style="display: none;" aria-hidden="true">
@@ -206,7 +96,6 @@
                     <div class="modal-footer">
                         <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
                         <input type="submit" class="btn btn-danger" value="Copy" />
-    {{--                    <button class="btn btn-danger" type="button" onclick="copyUsersToLocationsAction()">Copy</button>--}}
                     </div>
                 </form>
             </div>
@@ -215,10 +104,11 @@
 @endsection
 
 @section('scripts')
-    <script>
+    <script type="text/javascript">
         function updateFromLocation(e){
             let selectedLocationId = e.value;
 
+            $('#loader').show();
             let url = '{{ route("users_list", ["locationId" => "::locationId"]) }}';
             url = url.replace('::locationId', selectedLocationId);
 
@@ -279,8 +169,6 @@
             let formData = $("#copyUserForm").serializeArray();
             let token = $("#copyUserForm input[name=_token]").val();
 
-            //console.log(JSON.stringify(formData));
-
             $.ajax({
                 method: "POST",
                 headers: {
@@ -299,9 +187,11 @@
         }
 
         function openViewUserModal(userId, token){
+            let locationId = $("#selected_location_id").val();
+
             $.ajax({
                 method: 'GET',
-                url: 'show/' + userId,
+                url: 'show/' + locationId + '/' + userId,
                 headers: {
                     'X-CSRF-Token': token,
                     Accept: "application/json"
@@ -310,25 +200,27 @@
                     $('#loader').show();
                 },
                 success: (response) => {
-                    $("#show_user_name").html(response.Login);
-                    $("#show_first_name").html(response.FirstName);
-                    $("#show_last_name").html(response.LastName);
-                    $("#show_user_phone").html(response.Mobile);
-                    $("#show_user_email").html(response.Email);
-                    $("#show_mac_address").html(response.MAC);
-                    $("#show_can_log_back").html(response.CanLogBack);
-                    $("#show_user_card").html(response.Card);
+                    $("#view_login_name").html(response.edit_admin_name);
+                    $("#view_admin_first_name").html(response.edit_first_name);
+                    $("#view_admin_last_name").html(response.edit_last_name);
+                    $("#view_mobile").html(response.edit_user_phone);
+                    $("#view_email").html(response.edit_user_email);
+                    $("#view_mac").html(response.edit_mac_address);
+                    $("#edit_can_log_back").html(response.edit_can_log_back);
+                    $("#view_card").html(response.edit_user_card);
+                    $("#view_positin").html(response.edit_user_position);
+                    $("#view_user_max_inactive_time").html(response.edit_user_max_inactive_time);
                 }
             })
         }
 
         function openEditUserModal(userId, token){
-            console.log(userId);
-        }
+            // clear form first
+            $('#user_edit_form').each(function() { this.reset() });
 
-        function openAccessRulesModal(userId, token){
+            // get user data
             let locationId = $("#selected_location_id").val();
-            let url = "access_rules/" + userId + '/' + locationId;
+            let url = "show/" + locationId + '/' + userId;
 
             $.ajax({
                 method: "GET",
@@ -337,16 +229,39 @@
                 },
                 url: url,
                 success: (response) => {
-                    //console.log(response);
+                    $('#user_edit_form :input').each(function() {
+                        var input = $(this);
 
+                        $.each(response, function(fName, fValue){
+                            if(input.attr('name') == fName){
+                                input.val(fValue);
+                            }
+                        });
+
+                    });
+                },
+                error: (response) => {
+                    console.error(response);
+                }
+            });
+        }
+
+        function openAccessRulesModal(userId, token){
+            let locationId = $("#selected_location_id").val();
+            let url = "access_rules/" + locationId + '/' + userId;
+
+            $.ajax({
+                method: "GET",
+                headers: {
+                    Accept: "application/json"
+                },
+                url: url,
+                success: (response) => {
                     let accessRulesHtml = '';
-
                     accessRulesHtml = buildTreeMenu(response, accessRulesHtml);
 
                     $("#accessRulesRoot").html(accessRulesHtml);
-
                     activateTreemenu();
-
                     
                     $('<input>').attr({type: 'hidden', id: 'hUserId', name: 'userId', value: userId}).appendTo('#accessRulesModalFooter');
                     $('<input>').attr({type: 'hidden', id: 'hLocationId', name: 'locationId', value: locationId}).appendTo('#accessRulesModalFooter');
@@ -354,7 +269,7 @@
                 error: (response) => {
                     console.error(response);
                 }
-            })
+            });
         }
 
         function activateTreemenu(){
@@ -499,7 +414,7 @@
             let userId = $("#hUserId").val();
             let locationId = $("#hLocationId").val();
 
-            let url = "access_rules/" + userId + '/' + locationId;
+            let url = "access_rules/" + locationId + '/' + userId;
 
             $.ajax({
                 method: "POST",
@@ -535,19 +450,21 @@
                     toastr.error('Server error!', 'Error:');
                 }
             });
-
-            console.log(formData);
         }
 
         function saveNewUser(serverId){
             let formData = $("#user_add_form").serializeArray();
+            let locationId = $("#selected_location_id").val();
+            
+            let url = '{{ route("add_user", ["locationId" => "::locationId"]) }}';
+            url = url.replace('::locationId', locationId);
 
             $.ajax({
                 method: "POST",
                 headers: {
                     Accept: "application/json"
                 },
-                url: '{{ route("add_user") }}',
+                url: url,
                 data: formData,
                 success: (response) => {
                     console.log(response);
@@ -562,8 +479,6 @@
                         toastr.options.positionClass = 'toast-top-center';
                         toastr.error('Server error: ', 'Error:');
                     }
-
-                    //  window.location.assign('{{ route("users_list", ["locationId" => "0"]) }}')
                 },
                 error: (response) => {
                     console.log(response);
@@ -574,7 +489,11 @@
                 }
             });
 
-            console.log(formData);
+            //console.log(formData);
+        }
+
+        function clearUserAddForm(){
+            $('#user_add_form').each(function() { this.reset() });
         }
 
         $('#registerForm').submit(function (e) {

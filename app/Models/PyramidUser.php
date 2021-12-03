@@ -12,6 +12,8 @@ class PyramidUser extends Model
     protected $connection = 'mysql_main';
     protected $table = 'lmi.AdminInfo';
 
+    public $timestamps = false;
+
     protected $fillable = [
         'Login',
         'Password',

@@ -57,10 +57,21 @@ class   PyramidUsersController extends Controller
 
         $usersList = [];
 
-        $usersList = PyramidUser::all();
+        //$usersList = PyramidUser::all();
+        // get target location details from main server database
+        $params = [
+            'driver' => 'mysql',
+            'host' => $selectedLocationData['location_ip'],
+            'port' => 3306,
+            'database' => env('MASTER_DB_DATABASE', 'Mystery'),
+            'username' => env('MASTER_DB_USERNAME', 'app'),
+            'password' => env('MASTER_DB_PASSWORD', 'sau03magen')
+        ];
+        $targetConn = DatabaseConnection::setConnection($params);
 
+        $usersList = $targetConn->table('lmi.AdminInfo')->get()->toArray() ?? [];
+        
         $locationsList = LocationMasterIp::orderBy('ServerType')->get();
-
         return view('layouts.admin.users')
             ->with('selectedLocationData', $selectedLocationData)
             ->with('users', $usersList)
@@ -68,27 +79,72 @@ class   PyramidUsersController extends Controller
             ->with('locations', $locationsList) ;
     }
 
-    public function show($id){
-        return PyramidUser::find($id);
+    // get user for view/edit
+    public function show($locationId, $userId){
+        $adminData = [];
+
+        // get full locations list from master
+        $locationData = LocationMasterIp::where('LocationID', $locationId)->get()->toArray()[0] ?? [];
+
+        // get target location details from main server database
+        $params = [
+            'driver' => 'mysql',
+            'host' => $locationData['IP'],
+            'port' => 3306,
+            'database' => env('MASTER_DB_DATABASE', 'Mystery'),
+            'username' => env('MASTER_DB_USERNAME', 'app'),
+            'password' => env('MASTER_DB_PASSWORD', 'sau03magen')
+        ];
+        $targetConn = DatabaseConnection::setConnection($params);
+
+        $userData = $targetConn->table('lmi.AdminInfo')->where('ID', $userId)->get()->toArray()[0] ?? [];
+
+        //print_r($userData->Login); exit;
+
+        if(!empty($userData)){
+            $adminData = [
+                'edit_admin_name'               => $userData->Login ?? '',
+                'edit_admin_passwd'             => null,
+                'edit_first_name'               => $userData->FirstName ?? '',
+                'edit_last_name'                => $userData->LastName ?? '',
+                'edit_user_phone'               => $userData->Mobile ?? '',
+                'edit_user_email'               => $userData->Email ?? '',
+                'edit_mac_address'              => $userData->MAC ?? '',
+                'edit_can_log_back'             => $userData->CanLogBack ?? '',
+                'edit_user_card'                => $userData->Card ?? '',
+                'edit_user_position'            => $userData->Position ?? '',
+                'edit_user_max_inactive_time'   => $userData->MaxInactiveMin ?? ''
+            ];
+        }
+
+        return response()->json($adminData);
     }
 
-    public function store(Request $request){
+    // record new admin to database
+    public function store(Request $request, $selectedlocationId){
+        $formData = $request->all();
+
         $response = ['success' => false, 'message' => ''];
 
-        $forArray = [
-            'Login'     => $request['user_name'] ?? null,
-            'Password'  => $request['user_password'] ?? null,
-            'FirstName' => $request['first_name'] ?? null,
-            'LastName'  => $request['last_name'] ?? null,
-            'Mobile'    => $request['user_phone'] ?? null,
-            'Email'     => $request['user_email'] ?? null,
-            'MAC'       => $request['mac_address'] ?? null,
-            'CanLogBack'=> $request['can_log_back'] ?? null,
-            'Card'      => $request['user_card'] ?? null,
-            //'Mobile'    => $request['user_phone'] ?? null,
+        if(empty($formData['admin_passwd'])){
+            $response['message'] = 'Password required';
+            return response()->json($response);
+        }
+
+        $pass = $this->processPassword($formData['admin_passwd'], 'ENCRYPT') ?? null;
+        $formArray = [
+            'Login'     => strtoupper($formData['login_name']) ?? null,
+            'Password'  => $pass,
+            'FirstName' => $formData['first_name'] ?? null,
+            'LastName'  => $formData['last_name'] ?? null,
+            'Mobile'    => $formData['user_phone'] ?? null,
+            'Email'     => $formData['user_email'] ?? null,
+            'MAC'       => $formData['mac_address'] ?? null,
+            'CanLogBack'=> $formData['can_log_back'] ?? null,
+            'Card'      => $formData['user_card'] ?? null,
+            'Position'  => $request['user_position'] ?? null,
+            'MaxInactiveMin' => $request['max_inactive_time'] ?? null
         ];
-
-        $response = ['success' => false, 'message' => ''];
 
         $formValid = true;
         // form validation
@@ -104,10 +160,41 @@ class   PyramidUsersController extends Controller
         // end form validation
 
         if($formValid){
-            try{
-                $insertActionState = PyramidUser::insert($forArray);
+            // get full locations list from master
+            $locationData = LocationMasterIp::where('LocationID', $selectedlocationId)->get()->toArray()[0] ?? [];
 
-                if($insertActionState){
+            // get target location details from main server database
+            $params = [
+                'driver' => 'mysql',
+                'host' => $locationData['IP'],
+                'port' => 3306,
+                'database' => env('MASTER_DB_DATABASE', 'Mystery'),
+                'username' => env('MASTER_DB_USERNAME', 'app'),
+                'password' => env('MASTER_DB_PASSWORD', 'sau03magen')
+            ];
+            $targetConn = DatabaseConnection::setConnection($params);
+
+            try{
+                $insertedId = $targetConn->table('lmi.AdminInfo')->insertGetId($formArray);
+
+                if($insertedId){
+                    // clear access rules for user
+                    $targetConn->table('lmi.AdminRestriction')->where('AdminID', $insertedId)->delete();
+
+                    // get default access rules
+                    $accessRulesList = (new RestrictionList())->on('mysql_main')->get()->toArray();
+
+                    // save user access rules with defaults
+                    if(!empty($accessRulesList)){
+                        foreach($accessRulesList as $restriction){
+                            $targetConn->table('lmi.AdminRestriction')->insert([
+                                'AdminID'           => $insertedId,
+                                'Restriction'       => $restriction['Restriction'],
+                                'RestrictionValue'  => $restriction['DefaultValue']
+                            ]);
+                        }
+                    }
+
                     $response['success'] = true;
                 }
             }
@@ -164,8 +251,6 @@ class   PyramidUsersController extends Controller
         // get full locations list from master
         $locationsList = LocationMasterIp::all()->keyBy('LocationID')->toArray();
 
-        print '<pre>';
-
         foreach ($selectedLocations as $targetLocation){
             // get target location details from main server database
             $params = [
@@ -217,7 +302,7 @@ class   PyramidUsersController extends Controller
         return redirect()->route('users_list');
     }
 
-    public function accessRulesShow($userId, $locationId){
+    public function accessRulesShow($locationId, $userId){
         $accessRulessTree = [];
 
         $accessRulesList = (new RestrictionList())->on('mysql_main')->get()->toArray();
@@ -255,7 +340,7 @@ class   PyramidUsersController extends Controller
         return response()->json($accessRulessTree);
     }
 
-    public function accessRulesStore(Request $request, $userId, $locationId){
+    public function accessRulesStore(Request $request, $locationId, $userId){
         $selectedRestrictions = $request->all();
         $accessRulesList = (new RestrictionList())->on('mysql_main')->get()->toArray();
 
@@ -306,6 +391,16 @@ class   PyramidUsersController extends Controller
 
     private function getMasterLocation(){
         return LocationMasterIp::where('ServerType', 'Master')->get()->toArray();
+    }
+
+    private function processPassword($pass, $operation){
+        $returnArray = [];
+
+        for($i=0; $i<strlen($pass); $i++){
+            $returnArray[] = chr(1+ord($pass[$i]));
+        }
+
+        return implode('', $returnArray);
     }
 
 }

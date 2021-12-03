@@ -17,12 +17,12 @@
                         <form class="form-horizontal" action="#" id="user_add_form" method="post">
                             @csrf
                             <div class="form-group">
-                                <label for="user_name">Username</label>
-                                <input type="text" class="form-control" id="user_name" name="user_name" placeholder="Username">
+                                <label for="login_name">Admin Name</label>
+                                <input type="text" class="form-control" style="text-transform: uppercase" id="login_name" name="login_name" autocomplete="off" placeholder="Admin Name">
                             </div>
                             <div class="form-group">
-                                <label for="user_password">Password</label>
-                                <input type="password" class="form-control" id="user_password" name="user_password" placeholder="Password">
+                                <label for="admin_passwd">Admin Password</label>
+                                <input type="password" class="form-control" id="admin_passwd" name="admin_passwd" autocomplete="off" placeholder="Admin Password">
                             </div>
                             <div class="form-group">
                                 <label for="first_name">First Name</label>
@@ -55,6 +55,14 @@
                             <div class="form-group">
                                 <label for="user_card">Card</label>
                                 <input type="text" class="form-control" id="user_card" name="user_card" placeholder="Card">
+                            </div>
+                            <div class="form-group">
+                                <label for="user_position">Position</label>
+                                <input type="text" class="form-control" id="user_position" name="user_position" placeholder="Position">
+                            </div>
+                            <div class="form-group">
+                                <label for="user_max_inactive_time">Max Inactive Time</label>
+                                <input type="text" class="form-control" id="user_max_inactive_time" name="max_inactive_time" placeholder="Max Inactive Time">
                             </div>
                         </form>
                     </div>
