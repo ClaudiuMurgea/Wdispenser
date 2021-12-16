@@ -6,8 +6,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
-class AuthController extends Controller
-{
+
+class AuthController extends Controller{
     public function login(Request $request){
         $fields = $request->validate([
             'email' => 'required',
@@ -39,4 +39,5 @@ class AuthController extends Controller
             'message' => 'Out'
         ];
     }
+
 }

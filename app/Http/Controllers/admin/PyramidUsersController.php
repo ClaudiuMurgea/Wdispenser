@@ -5,6 +5,7 @@ namespace App\Http\Controllers\admin;
 use App\Helpers\DatabaseConnection;
 use App\Http\Controllers\Controller;
 use App\Models\AdminRestriction;
+use App\Models\AdminRestrictionsTemplate;
 use App\Models\LocationMasterIp;
 use App\Models\PyramidUser;
 use App\Models\RestrictionList;
@@ -120,7 +121,7 @@ class   PyramidUsersController extends Controller
         return response()->json($adminData);
     }
 
-    // record new admin to database
+    // record new user to database
     public function store(Request $request, $selectedlocationId){
         $formData = $request->all();
 
@@ -135,15 +136,15 @@ class   PyramidUsersController extends Controller
         $formArray = [
             'Login'     => strtoupper($formData['login_name']) ?? null,
             'Password'  => $pass,
-            'FirstName' => $formData['first_name'] ?? null,
-            'LastName'  => $formData['last_name'] ?? null,
-            'Mobile'    => $formData['user_phone'] ?? null,
-            'Email'     => $formData['user_email'] ?? null,
-            'MAC'       => $formData['mac_address'] ?? null,
-            'CanLogBack'=> $formData['can_log_back'] ?? null,
-            'Card'      => $formData['user_card'] ?? null,
-            'Position'  => $request['user_position'] ?? null,
-            'MaxInactiveMin' => $request['max_inactive_time'] ?? null
+            'FirstName' => $formData['first_name'] ?? '',
+            'LastName'  => $formData['last_name'] ?? '',
+            'Mobile'    => $formData['user_phone'] ?? '',
+            'Email'     => $formData['user_email'] ?? '',
+            'MAC'       => $formData['mac_address'] ?? '',
+            'CanLogBack'=> $formData['can_log_back'] ?? '',
+            'Card'      => $formData['user_card'] ?? -1,
+            'Position'  => $request['user_position'] ?? '',
+            'MaxInactiveMin' => $request['max_inactive_time'] ?? ''
         ];
 
         $formValid = true;
@@ -212,7 +213,7 @@ class   PyramidUsersController extends Controller
         $selectedLocations = [];
         $selectedUsers = [];
 
-        // todo: implement server from
+        // // todo: implement server from
         if(!empty($formData) && is_array($formData)){
             foreach ($formData as $name => $value){
                 if($name != '_token'){
@@ -222,19 +223,29 @@ class   PyramidUsersController extends Controller
             }
         }
 
-        if(empty($selectedLocations) || empty($selectedUsers)) return redirect()->route('users_list');
+        if(empty($selectedLocations) || empty($selectedUsers)){
+            return response()->json(['success' => false, 'message' => 'Missing data!']);
+        };
 
-        $mainDbParams = [
-            'driver'    => 'mysql',
-            'url'       => env('MASTER_DATABASE_URL'),
-            'host'      => env('SMASTER_DB_HOST', '127.0.0.1'),
-            'port'      => env('MASTER_DB_PORT', '3306'),
-            'database'  => env('MASTER_DB_DATABASE', 'forge'),
-            'username'  => env('MASTER_DB_USERNAME', 'forge'),
-            'password'  => env('MASTER_DB_PASSWORD', ''),
+        // temporary: LocationID must be received from frontend
+        $masterLocation = $this->getMasterLocation();
+        $locationId = $masterLocation[0]['LocationID'];
+        // end temporary
+
+        // get full locations list from master
+        $locationData = LocationMasterIp::where('LocationID', $locationId)->get()->toArray()[0] ?? [];
+
+        // get target location details from main server database
+        $params = [
+            'driver' => 'mysql',
+            'host' => $locationData['IP'],
+            'port' => 3306,
+            'database' => env('MASTER_DB_DATABASE', 'Mystery'),
+            'username' => env('MASTER_DB_USERNAME', 'app'),
+            'password' => env('MASTER_DB_PASSWORD', 'sau03magen')
         ];
 
-        $sourceConn = DatabaseConnection::setConnection($mainDbParams);
+        $sourceConn = DatabaseConnection::setConnection($params);
         $locationUsers = $sourceConn->table('lmi.AdminInfo')->get()->map(function($i){
             return (array)$i;
         })->keyBy('ID')->toArray();
@@ -280,7 +291,9 @@ class   PyramidUsersController extends Controller
                             'MAC'           => $_selectedUser['MAC'],
                             'CanLogBack'    => $_selectedUser['CanLogBack'],
                             'Card'          => $_selectedUser['Card'],
-                            'Position'      => $_selectedUser['Position']
+                            'Position'      => $_selectedUser['Position'],
+                            'MaxInactiveMin'=> $_selectedUser['MaxInactiveMin'],
+                            'RestrictionTemplate' => $_selectedUser['RestrictionTemplate']
                         ));
 
                     $targetConn->table('lmi.AdminRestriction')->where('AdminID', $insertedId)->delete();
@@ -295,21 +308,52 @@ class   PyramidUsersController extends Controller
                 }
                 else{// update
                     // 1831
+                    // update user data
+
+
+                    // remove old restrictions
+                    $targetConn->table('lmi.AdminRestriction')->where('AdminID', $targetLocationUsers[0]['ID'])->delete();
+
+                    // save new restrictions
+                    foreach ($_selectedUser['restrictions'] as $usrRestriction){
+                        $targetConn->table('lmi.AdminRestriction')->insert(
+                            array(
+                                'AdminID'           => $targetLocationUsers[0]['ID'],
+                                'Restriction'       => $usrRestriction['Restriction'],
+                                'RestrictionValue'  => $usrRestriction['RestrictionValue']
+                            ));
+                    }
                 }
             }
         }
 
-        return redirect()->route('users_list');
+        return response()->json(['success' => true]);
     }
 
     public function accessRulesShow($locationId, $userId){
         $accessRulessTree = [];
 
         $accessRulesList = (new RestrictionList())->on('mysql_main')->get()->toArray();
-        $userRestrictions = (new AdminRestriction())
+        $userRestrictions = [];
+
+        // get full locations list from master
+        $locationData = LocationMasterIp::where('LocationID', $locationId)->get()->toArray()[0] ?? [];
+
+        // get target location details from main server database
+        $params = [
+            'driver' => 'mysql',
+            'host' => $locationData['IP'],
+            'port' => 3306,
+            'database' => env('MASTER_DB_DATABASE', 'Mystery'),
+            'username' => env('MASTER_DB_USERNAME', 'app'),
+            'password' => env('MASTER_DB_PASSWORD', 'sau03magen')
+        ];
+
+        $sourceConn = DatabaseConnection::setConnection($params);
+        $userRestrictions = $sourceConn->table('lmi.AdminRestriction')
             ->where('AdminID', $userId)
             ->get()
-            ->mapWithKeys(function($item){ return [$item['Restriction'] => $item['RestrictionValue']]; })
+            ->mapWithKeys(function($item){ return [$item->Restriction => $item->RestrictionValue]; })
             ->toArray();
 
         if(!empty($accessRulesList)){
@@ -322,8 +366,21 @@ class   PyramidUsersController extends Controller
                 // $accessRule['children'] = [];
                 $accessRule['r_name'] = $name;
                 $accessRule['f_name'] = strtolower(str_replace('/', '', str_replace(' ', '', $accessRule['Restriction'])));
-                $accessRule['UserValue'] = $userRestrictions[$accessRule['Restriction']] ?? '';
                 $accessRule['additional'] = explode(",", $accessRule['Additional']);
+
+                if($accessRule['Type'] == 'ShowHide' || $accessRule['Type'] == 'Select'){
+                    $accessRule['UserValue'] = $userRestrictions[$accessRule['Restriction']] ?? '';
+                }
+                else{
+                    // send as array to can match on front
+                    if(!empty($userRestrictions[$accessRule['Restriction']])){
+                        $accessRule['UserValue'] =  explode(',', $userRestrictions[$accessRule['Restriction']]);
+                    }
+                    else{
+                        $accessRule['UserValue'] = '';
+                    }
+                }
+
                 // Parinte - de la primul nivel
                 if ($isRoot) {
                     $accessRulessTree[$name] = $accessRule;
@@ -337,7 +394,13 @@ class   PyramidUsersController extends Controller
             }
         }
 
-        return response()->json($accessRulessTree);
+        $responseArray = [
+            "access_rules_tree"     => $accessRulessTree, 
+            "templates"             => $this->getAllTemplatesNames(), 
+            "RestrictionTemplate"   => ($sourceConn->table('lmi.AdminInfo')->select('RestrictionTemplate')->where('ID', $userId)->first())->RestrictionTemplate ?? ''
+        ];
+
+        return response()->json($responseArray);
     }
 
     public function accessRulesStore(Request $request, $locationId, $userId){
@@ -358,6 +421,9 @@ class   PyramidUsersController extends Controller
         ];
         $targetConn = DatabaseConnection::setConnection($params);
 
+        // save template name in users table
+        $targetConn->table('lmi.AdminInfo')->where('ID', $userId)->update(array('RestrictionTemplate' => ($selectedRestrictions['TemplateName'] ?? '')));
+
         $userRestrictions = [];
         if(!empty($accessRulesList)){
             // remove existent restrictions
@@ -370,10 +436,10 @@ class   PyramidUsersController extends Controller
                     if(isset($selectedRestrictions[$searchKey])) $usersRestriction = 'Show';
                 }
                 elseif($accessRule['Type'] == 'Choice'){
-                    $usersRestriction = '';
+                    if(isset($selectedRestrictions[$searchKey])) $usersRestriction = $selectedRestrictions[$searchKey];
                 }
                 elseif($accessRule['Type'] == 'CheckList'){
-                    $usersRestriction = '';
+                    if(isset($selectedRestrictions[$searchKey])) $usersRestriction = implode(',', $selectedRestrictions[$searchKey]);
                 }
 
                 $userRestrictions[] = [
@@ -401,6 +467,10 @@ class   PyramidUsersController extends Controller
         }
 
         return implode('', $returnArray);
+    }
+
+    private function getAllTemplatesNames(){
+        return (new AdminRestrictionsTemplate)->select('TemplateName')->groupBy('TemplateName')->get()->toArray();
     }
 
 }

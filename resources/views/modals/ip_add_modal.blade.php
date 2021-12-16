@@ -40,8 +40,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-sm btn-secondary" type="button" data-dismiss="modal">Close</button>
                 <button class="btn btn-sm btn-success" type="button" onclick="addNewServer();">Save IP</button>
+                <button class="btn btn-sm btn-secondary" type="button" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>

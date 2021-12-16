@@ -22,5 +22,5 @@ Route::group([
         'middleware'=> 'auth:sanctum'
     ], function(){
         //Route::get('/ob-actions', [\App\Http\Controllers\OBAActionController::class, 'index'])->name('ob_actions');
-        Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout']);
+        //Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout']);
 });

@@ -3,7 +3,9 @@
 @section('content')
     <div class="container-fluid">
         <button class="btn btn-success mb-1" type="button" data-toggle="modal" data-target="#addUserModal" onclick="clearUserAddForm()">Add user</button>
+        <a href="{{ route('access_rules_templates') }}" class="btn btn-warning mb-1" onclick="showLoadingOverlay()"  >Access Rules Templates</a>
     </div>
+    <br/>
     <div class="container container-fluid">
         <div class="row">
             <div class="d-lg-table-cell col-sm-6">
@@ -75,6 +77,7 @@
     @include('modals.user_view_modal')
     @include('modals.user_edit_modal')
     @include('modals.access_rules_modal')
+    @include('modals.user_access_rules.uar_add_template')
 
 {{--    user copy modal --}}
     <div class="modal fade" id="copyUserModal" tabindex="-1" aria-labelledby="copyUserModal" style="display: none;" aria-hidden="true">
@@ -94,8 +97,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
+                        <input type="button" class="btn btn-danger" value="Copy" onclick="copyUsersToLocationsAction()" />
                         <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
-                        <input type="submit" class="btn btn-danger" value="Copy" />
                     </div>
                 </form>
             </div>
@@ -167,23 +170,27 @@
 
         function copyUsersToLocationsAction(){
             let formData = $("#copyUserForm").serializeArray();
-            let token = $("#copyUserForm input[name=_token]").val();
+            // let url = '{{ route("users_list", ["locationId" => "::locationId"]) }}';
+
+            // let locationId = $("#selected_location_id").val();
+            // url = url.replace('::locationId', locationId);
 
             $.ajax({
                 method: "POST",
                 headers: {
-                    'X-CSRF-Token': token,
+                    //'X-CSRF-Token': token,
                     Accept: "application/json"
                 },
-                url: "user/copy",
-                data: JSON.stringify(formData),
+                beforeSend: function(){
+                    showLoadingOverlay();
+                },
+                url: '{{ route("copy_user") }}',
+                data: formData,
                 success: () => window.location.assign("{{ route('users_list', ['locationId' => 0]) }}"),
                 error: (response) => {
 
                 }
-            })
-
-
+            });
         }
 
         function openViewUserModal(userId, token){
@@ -258,13 +265,22 @@
                 url: url,
                 success: (response) => {
                     let accessRulesHtml = '';
-                    accessRulesHtml = buildTreeMenu(response, accessRulesHtml);
+                    accessRulesHtml = buildTreeMenu(response.access_rules_tree, accessRulesHtml);
 
                     $("#accessRulesRoot").html(accessRulesHtml);
                     activateTreemenu();
                     
                     $('<input>').attr({type: 'hidden', id: 'hUserId', name: 'userId', value: userId}).appendTo('#accessRulesModalFooter');
                     $('<input>').attr({type: 'hidden', id: 'hLocationId', name: 'locationId', value: locationId}).appendTo('#accessRulesModalFooter');
+                    $('#restrictionsTemplateSelector').find('option').remove().end().append('<option value="">Load from template</option>');
+
+                    $.each(response.templates, function (i, item) {
+                        $('#restrictionsTemplateSelector').append($('<option>', { 
+                            value: item.TemplateName,
+                            text : item.TemplateName,
+                            selected: (item.TemplateName == response.RestrictionTemplate)
+                        }));
+                    });
                 },
                 error: (response) => {
                     console.error(response);
@@ -319,7 +335,6 @@
                             }
                             else if(value.Type == 'Choice'){ // select
                                 if(value.UserValue == ''){// user restriction not set
-                                console.log(value);
                                     tree += '<li>';
                                         tree += '<li>';
                                         tree += '<span class="caret"></span>';
@@ -377,26 +392,21 @@
                                 }
                             }
                             else if(value.Type == 'CheckList'){ // checkbox
+                                //console.log(value.UserValue);
+
                                 tree += '<ul>';
-                                if(value.UserValue == '' && false){// user restriction not set
-                                    $.each(value.additional, function(k, aditional){
-                                        tree += '<li>';
-                                            tree += '<input type="checkbox" name="' + value.f_name + '" value="' + aditional + '" /> ';
-                                            tree += aditional;
-                                        tree += '</li>';
-                                    });
-                                }
-                                else{
-                                    $.each(value.additional, function(k, aditional){
-                                        tree += '<li>';
-                                            tree += '<input type="checkbox" id="' + value.f_name + aditional + '" name="' + value.f_name + '[]" value="' + aditional + '" /> ';
-                                            tree += '<label style="margin-bottom:0; cursor:pointer" for="' + value.f_name + aditional + '">' + aditional + '</label>';
-                                        tree += '</li>';
-                                    });
-                                }
+                                $.each(value.additional, function(k, aditional){
+                                    let checked = '';
+                                    if(value.UserValue.includes(aditional)) checked = ' checked="checked" ';
+
+                                    tree += '<li>';
+                                        tree += '<input type="checkbox" id="' + value.f_name + aditional + '" name="' + value.f_name + '[]" value="' + aditional + '" '+checked+' /> ';
+                                        tree += '<label style="margin-bottom:0; cursor:pointer" for="' + value.f_name + aditional + '">' + aditional + '</label>';
+                                    tree += '</li>';
+                                });
                                 tree += '</ul>';
                             }
-                            else if(value.Type == 'Choice'){ // select
+                            else if(value.Type == 'Choice'){ // select // last child probably not the case
                                 
                             }
                         }
@@ -411,10 +421,13 @@
 
         function saveUserRestrictions(){
             let formData = $("#access_rules_form").serializeArray();
+            formData.push({ name: 'TemplateName', value: $("#restrictionsTemplateSelector").val() });
             let userId = $("#hUserId").val();
             let locationId = $("#hLocationId").val();
 
             let url = "access_rules/" + locationId + '/' + userId;
+            let redirectUrl = '{{ route("users_list", ["locationId" => "::locationId"]) }}';
+            redirectUrl = redirectUrl.replace('::locationId', locationId);
 
             $.ajax({
                 method: "POST",
@@ -427,7 +440,7 @@
                 url: url,
                 data: formData,
                 success: (response) => {
-                    console.log(response);
+                    //console.log(response);
 
                     if(response.status){
                         toastr.options.timeOut = 5000;
@@ -440,7 +453,7 @@
                         toastr.error('Server error: ', 'Error:');
                     }
 
-                    window.location.assign('{{ route("users_list", ["locationId" => "0"]) }}')
+                    window.location.assign(redirectUrl);
                 },
                 error: (response) => {
                     console.log(response);
@@ -466,13 +479,18 @@
                 },
                 url: url,
                 data: formData,
+                beforeSend: function(){
+                    showLoadingOverlay();
+                },
                 success: (response) => {
-                    console.log(response);
+                    console.log(response.status);
 
-                    if(response.status){
+                    if(response.success){
                         toastr.options.timeOut = 5000;
                         toastr.options.positionClass = 'toast-top-center';
                         toastr.success('User recorded!', 'Succes:');
+
+                        window.location.assign('{{ route("users_list", ["locationId" => "0"]) }}');
                     }
                     else{
                         toastr.options.timeOut = 5000;
@@ -522,5 +540,62 @@
                 }
             })
         });
+
+
+        function formClearAll(){
+            $("form#access_rules_form :input[type=checkbox]").each(function(){ 
+                this.checked = false;
+            });
+
+            $("#access_rules_form select").each(function(){ 
+                this.value = 'Hide';
+            });
+        }
+
+        function formSelectAll(){
+            $("form#access_rules_form :input[type=checkbox]").each(function(){ 
+                this.checked = true;
+            });
+
+            $("#access_rules_form select").each(function(){ 
+                this.value = '2 Days';
+            });
+        }
+
+        function loadRestrictionsTemplate(TemplateName){
+            if(TemplateName == null || TemplateName == undefined || TemplateName == '') return;
+
+            let url = '{{ route("access_rules_template", ["TemplateName" => "::TemplateName"]) }}';
+            url = url.replace('::TemplateName', TemplateName);
+            $.get(url, function( response ){
+                let accessRulesHtml = '';
+                    accessRulesHtml = buildTreeMenu(response.access_rules_tree, accessRulesHtml);
+
+                    $("#accessRulesRoot").html(accessRulesHtml);
+                    activateTreemenu();
+            });
+        }
+
+        function showTemplateNameInput(){
+            $("#templateNameDiv").show('slow');
+        }
+
+        function exportRestrictionsToTemplate(action){
+            let TemplateName = $("#templateNameInput").val();
+
+            if(TemplateName == undefined || TemplateName == ''){
+                toastr.options.timeOut = 5000;
+                toastr.options.positionClass = 'toast-top-center';
+                toastr.error('Template name required!', 'Error:');
+
+                return;
+            }
+
+            $("#templateNameDiv").hide('slow');
+
+            if(action == 'cancel') return;
+
+            let formData = $("#access_rules_form").serializeArray();
+        }
     </script>
 @endsection
