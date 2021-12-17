@@ -115,6 +115,7 @@
             let url = '{{ route("users_list", ["locationId" => "::locationId"]) }}';
             url = url.replace('::locationId', selectedLocationId);
 
+            showLoadingOverlay();
             window.location.assign(url);
         }
 

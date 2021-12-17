@@ -23,10 +23,12 @@ class   PyramidUsersController extends Controller
         if($selectedlocationId == 0){ // search for master location
             $masterLocation = $this->getMasterLocation()[0] ?? [];
 
+            //dd($masterLocation);
+
             if(!empty($masterLocation)){// master found
                 $currentLocationId = $masterLocation['LocationID'] ?? 0;
                 $selectedLocationData = [
-                    'location_ip'   => $masterLocation['IP'],
+                    'location_ip'   => env('MASTER_DB_HOST', $masterLocation['IP']),
                     'server_type'   => $masterLocation['ServerType'],
                     'location_name' => $masterLocation['LocationName']
                 ];
