@@ -262,6 +262,9 @@
                 headers: {
                     Accept: "application/json"
                 },
+                beforeSend: function(){
+                    showLoadingOverlay();
+                },
                 url: url,
                 success: (response) => {
                     let accessRulesHtml = '';
@@ -281,6 +284,10 @@
                             selected: (item.TemplateName == response.RestrictionTemplate)
                         }));
                     });
+
+                    setTimeout(function() { 
+                        hideLoadingOverlay();
+                    }, 500);
                 },
                 error: (response) => {
                     console.error(response);
@@ -440,8 +447,6 @@
                 url: url,
                 data: formData,
                 success: (response) => {
-                    //console.log(response);
-
                     if(response.status){
                         toastr.options.timeOut = 5000;
                         toastr.options.positionClass = 'toast-top-center';
