@@ -14,45 +14,65 @@
             <div class="modal-body">
                 <div class="card">
                     <div class="card-body">
-                        <div class="form-group">
-                            <label>Login Name</label>
-                            <span class="form-control" id="view_login_name"></span>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Login Name</label>
+                            <div class="col-sm-8">
+                                <span class="form-control" id="view_login_name"></span>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>First Name</label>
-                            <span class="form-control" id="view_admin_first_name"></span>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">First Name</label>
+                            <div class="col-sm-8">
+                                <span class="form-control" id="view_admin_first_name"></span>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Last Name</label>
-                            <span class="form-control" id="view_admin_last_name"></span>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Last Name</label>
+                            <div class="col-sm-8">
+                                <span class="form-control" id="view_admin_last_name"></span>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Mobile</label>
-                            <span class="form-control" id="view_mobile"></span>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Mobile</label>
+                            <div class="col-sm-8">
+                                <span class="form-control" id="view_mobile"></span>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Email</label>
-                            <span class="form-control" id="view_email"></span>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Email</label>
+                            <div class="col-sm-8">
+                                <span class="form-control" id="view_email"></span>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>MAC</label>
-                            <span class="form-control" id="view_mac"></span>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">MAC</label>
+                            <div class="col-sm-8">
+                                <span class="form-control" id="view_mac"></span>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Can Log Back</label>
-                            <span class="form-control" id="edit_can_log_back"></span>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Can Log Back</label>
+                            <div class="col-sm-8">
+                                <span class="form-control" id="edit_can_log_back"></span>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Card</label>
-                            <span class="form-control" id="view_card"></span>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Card</label>
+                            <div class="col-sm-8">
+                                <span class="form-control" id="view_card"></span>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Positin</label>
-                            <span class="form-control" id="view_positin"></span>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Positin</label>
+                            <div class="col-sm-8">
+                                <span class="form-control" id="view_positin"></span>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Max Inactive Time</label>
-                            <span class="form-control" id="view_user_max_inactive_time"></span>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Max Inactive Time</label>
+                            <div class="col-sm-8">
+                                <span class="form-control" id="view_user_max_inactive_time"></span>
+                            </div>
                         </div>
                         
                     </div>

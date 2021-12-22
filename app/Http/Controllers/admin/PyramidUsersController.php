@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\admin;
 
+use DB;
+
 use App\Helpers\DatabaseConnection;
 use App\Http\Controllers\Controller;
 use App\Models\AdminRestriction;
@@ -413,15 +415,7 @@ class   PyramidUsersController extends Controller
         $locationsList = LocationMasterIp::all()->keyBy('LocationID')->toArray();
 
         // get target location details from main server database
-        $params = [
-            'driver' => 'mysql',
-            'host' => $locationsList[$locationId]['IP'],
-            'port' => 3306,
-            'database' => env('MASTER_DB_DATABASE', 'Mystery'),
-            'username' => env('MASTER_DB_USERNAME', 'app'),
-            'password' => env('MASTER_DB_PASSWORD', 'sau03magen')
-        ];
-        $targetConn = DatabaseConnection::setConnection($params);
+        $targetConn = DatabaseConnection::setConnection($this->getConnectionParams($locationsList[$locationId]));
 
         // save template name in users table
         $targetConn->table('lmi.AdminInfo')->where('ID', $userId)->update(array('RestrictionTemplate' => ($selectedRestrictions['TemplateName'] ?? '')));
@@ -454,7 +448,60 @@ class   PyramidUsersController extends Controller
             $targetConn->table('lmi.AdminRestriction')->insert($userRestrictions);
         }
 
-        return response()->json(['status' => true]);
+        // if is master server update user restrictions in all slave locations
+        $updatedServers = [];
+        if($locationsList[$locationId]['ServerType'] == 'Master'){
+            $masterLocationUserData = (new PyramidUser())->on('mysql_main')->where('ID', $userId)->first();
+
+            foreach($locationsList as $location){
+                if($location['ServerType'] == 'Master') continue;
+
+                $params = $this->getConnectionParams($location);
+                config(['database.connections.mysql_dinamic_connection.host' => $params['host']]);
+
+                try{
+                    //$targetConn->getPdo();
+                    // search for user
+                    $targetLocationUserData = DB::connection('mysql_dinamic_connection')->table('lmi.AdminInfo')->where('Login', $masterLocationUserData->Login)->first();
+                    
+                    if(!empty($targetLocationUserData->ID && !empty($userRestrictions))){
+                        // just update user id
+                        foreach($userRestrictions as &$usrRestriction){
+                            $usrRestriction['AdminID'] = $targetLocationUserData->ID;
+                        }
+
+                        // update template name in users table
+                        DB::connection('mysql_dinamic_connection')
+                            ->table('lmi.AdminInfo')
+                            ->where('ID', $targetLocationUserData->ID)
+                            ->update(array('RestrictionTemplate' => ($selectedRestrictions['TemplateName'] ?? '')));
+                        // remove existent restrictions
+                        DB::connection('mysql_dinamic_connection')
+                            ->table('lmi.AdminRestriction')
+                            ->where('AdminID', $targetLocationUserData->ID)
+                            ->delete();
+                        // add new restrictions
+                        DB::connection('mysql_dinamic_connection')
+                            ->table('lmi.AdminRestriction')
+                            ->insert($userRestrictions);
+                        
+                        $updatedServers[] = [
+                            'location_host'     => $params['host'],
+                            'location_name'     => $location['LocationName'],
+                            'username'          => $targetLocationUserData->Login ?? 0
+                        ];
+                    }
+
+                    // close connection
+                    DB::disconnect('mysql_dinamic_connection');
+                }
+                catch(\Throwable $e){
+                    // print_r('error');
+                }
+            }
+        }
+
+        return response()->json(['status' => true, 'updated_servers' => $updatedServers]);
     }
 
     private function getMasterLocation(){
@@ -473,6 +520,17 @@ class   PyramidUsersController extends Controller
 
     private function getAllTemplatesNames(){
         return (new AdminRestrictionsTemplate)->select('TemplateName')->groupBy('TemplateName')->get()->toArray();
+    }
+
+    private function getConnectionParams($location){
+        return $params = [
+            'driver' => 'mysql',
+            'host' => $location['IP'],
+            'port' => 3306,
+            'database' => env('MASTER_DB_DATABASE', 'Mystery'),
+            'username' => env('MASTER_DB_USERNAME', 'app'),
+            'password' => env('MASTER_DB_PASSWORD', 'sau03magen')
+        ];
     }
 
 }

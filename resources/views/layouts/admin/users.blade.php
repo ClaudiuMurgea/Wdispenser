@@ -77,7 +77,7 @@
     @include('modals.user_view_modal')
     @include('modals.user_edit_modal')
     @include('modals.access_rules_modal')
-    @include('modals.user_access_rules.uar_add_template')
+    {{-- @include('modals.user_access_rules.uar_add_template') --}}
 
 {{--    user copy modal --}}
     <div class="modal fade" id="copyUserModal" tabindex="-1" aria-labelledby="copyUserModal" style="display: none;" aria-hidden="true">
@@ -274,6 +274,9 @@
                     $("#accessRulesRoot").html(accessRulesHtml);
                     activateTreemenu();
                     
+                    $("#hUserId").remove();
+                    $("#hLocationId").remove();
+
                     $('<input>').attr({type: 'hidden', id: 'hUserId', name: 'userId', value: userId}).appendTo('#accessRulesModalFooter');
                     $('<input>').attr({type: 'hidden', id: 'hLocationId', name: 'locationId', value: locationId}).appendTo('#accessRulesModalFooter');
                     $('#restrictionsTemplateSelector').find('option').remove().end().append('<option value="">Load from template</option>');
@@ -339,7 +342,7 @@
                                 }
                             }
                             else if(value.Type == 'CheckList'){// multiple cb`s
-                                console.log(value);
+                                //console.log(value);
                             }
                             else if(value.Type == 'Choice'){ // select
                                 if(value.UserValue == ''){// user restriction not set
@@ -400,8 +403,6 @@
                                 }
                             }
                             else if(value.Type == 'CheckList'){ // checkbox
-                                //console.log(value.UserValue);
-
                                 tree += '<ul>';
                                 $.each(value.additional, function(k, aditional){
                                     let checked = '';
@@ -430,6 +431,7 @@
         function saveUserRestrictions(){
             let formData = $("#access_rules_form").serializeArray();
             formData.push({ name: 'TemplateName', value: $("#restrictionsTemplateSelector").val() });
+            
             let userId = $("#hUserId").val();
             let locationId = $("#hLocationId").val();
 
@@ -443,7 +445,7 @@
                     Accept: "application/json"
                 },
                 beforeSend: function(){
-                    showLoadingOverlay();
+                    //showLoadingOverlay();
                 },
                 url: url,
                 data: formData,
@@ -459,11 +461,10 @@
                         toastr.error('Server error: ', 'Error:');
                     }
 
-                    window.location.assign(redirectUrl);
+                    //window.location.assign(redirectUrl);
+
                 },
                 error: (response) => {
-                    console.log(response);
-                    
                     toastr.options.timeOut = 5000;
                     toastr.options.positionClass = 'toast-top-center';
                     toastr.error('Server error!', 'Error:');
@@ -489,8 +490,6 @@
                     showLoadingOverlay();
                 },
                 success: (response) => {
-                    console.log(response.status);
-
                     if(response.success){
                         toastr.options.timeOut = 5000;
                         toastr.options.positionClass = 'toast-top-center';
@@ -501,19 +500,24 @@
                     else{
                         toastr.options.timeOut = 5000;
                         toastr.options.positionClass = 'toast-top-center';
-                        toastr.error('Server error: ', 'Error:');
+                        toastr.error(response.message, 'Error:');
+
+                        hideLoadingOverlay();
                     }
                 },
                 error: (response) => {
-                    console.log(response);
-                    
                     toastr.options.timeOut = 5000;
                     toastr.options.positionClass = 'toast-top-center';
                     toastr.error('Server error!', 'Error:');
                 }
             });
+        }
 
-            //console.log(formData);
+        function updateUserData(){
+            let formData = $("#user_add_form").serializeArray();
+            let locationId = $("#selected_location_id").val();
+
+            console.log(formData);
         }
 
         function clearUserAddForm(){
@@ -547,6 +551,14 @@
             })
         });
 
+        // on checkbox is clicked / "input[type='checkbox']"
+        $(document).on('change', 'div#accessRulesModal input[type="checkbox"]', function(){
+            $("#restrictionsTemplateSelector").val('');
+
+            //let input = $(this);
+
+            //console.log(input);
+        });
 
         function formClearAll(){
             $("form#access_rules_form :input[type=checkbox]").each(function(){ 

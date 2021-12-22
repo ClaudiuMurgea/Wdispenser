@@ -149,7 +149,7 @@
                             }
                         }
                         else if(value.Type == 'CheckList'){// multiple cb`s
-                            console.log('CheckList');
+                            //console.log('CheckList');
                         }
                         else if(value.Type == 'Choice'){ // select
                             // user restriction not set
@@ -206,7 +206,6 @@
                             tree += '</ul>';
                         }
                         else if(value.Type == 'Choice'){ // select
-                            //console.log('Choice');
                             tree += '<li>';
                                     tree += ' <span>' + value.r_name + '</span>';
                                     tree += '<ul><select name="' + value.f_name + '">';
@@ -233,8 +232,6 @@
 
         function saveRestrictionsTemplate(){
             let formData = $("#accessRulesTemplateForm").serializeArray();
-            
-            console.log(formData);
             $.ajax({
                 method: "POST",
                 headers: {
@@ -262,8 +259,6 @@
                     }
                 },
                 error: (response) => {
-                    console.log(response);
-                    
                     toastr.options.timeOut = 5000;
                     toastr.options.positionClass = 'toast-top-center';
                     toastr.error('Server error!', 'Error:');
