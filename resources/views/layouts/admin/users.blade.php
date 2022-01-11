@@ -9,7 +9,7 @@
     <div class="container container-fluid">
         <div class="row">
             <div class="d-lg-table-cell col-sm-6">
-                <span class="font-weight-bold">From location</span>
+                <span class="font-weight-bold">Location</span>
                 <select class="form-control input-group-sm" id="selected_location_id" onchange="updateFromLocation(this)">
                     @foreach($locations as $location)
                     <option value="{{ $location['LocationID'] }}" {{ $currentLocationId == $location['LocationID'] ? 'selected="selected"' : '' }}>{{ $location['IP'] }} | {{ $location['ServerType'] }} | {{ $location['LocationName'] }}</option>
@@ -17,11 +17,11 @@
                 </select>
             </div>
             <div class="d-md-table-cell col-sm-6">
-                <span class="font-weight-bold">To location</span>
+                <span class="font-weight-bold">Action</span>
                 <select class="form-control input-group-sm" onchange="processAction(this)">
                     <option value="none">Select Action</option>
                     <optgroup label="Copy">
-                        <option value="copy_to_location">Copy to location</option>
+                        <option value="copy_to_location" id="copyToLocationOption">Copy to location</option>
                     </optgroup>
                 </select>
             </div>
@@ -40,6 +40,7 @@
                     <th>Card</th>
                     <th>Position</th>
                     <th>Select</th>
+                    <th>Locations</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -59,6 +60,9 @@
                             <td>{{ $user->Position }}</td>
                             <td>
                                 <input type="checkbox" class="form-check" name="user_{{ $user->ID }}" value="{{ $user->ID }}">
+                            </td>
+                            <td>
+                                <span></span>
                             </td>
                             <td>
                                 <div class="btn-group btn-group-lg btn-group-sm mb-3">
@@ -108,6 +112,19 @@
 
 @section('scripts')
     <script type="text/javascript">
+        $( document ).ready(function() {
+            let fromLocation = $("#selected_location_id option:selected").text();
+
+            if (~fromLocation.indexOf("Master")){
+                // copy to location enable
+                $("#copyToLocationOption").prop('disabled', false);
+            }
+            else{
+                // copy to location disable
+                $("#copyToLocationOption").prop('disabled', true);
+            }
+        });
+
         function updateFromLocation(e){
             let selectedLocationId = e.value;
 
@@ -245,7 +262,15 @@
                                 input.val(fValue);
                             }
                         });
+                    });
 
+                    $('#edit_user_position').find('option').remove().end().append('<option value="">Select Template</option>');
+                    $.each(response.positions_options, function (i, item) {
+                        $('#edit_user_position').append($('<option>', {
+                            value: item.TemplateName,
+                            text : item.TemplateName,
+                            selected: (item.TemplateName == response.edit_user_position)
+                        }));
                     });
                 },
                 error: (response) => {
@@ -258,6 +283,10 @@
             let locationId = $("#selected_location_id").val();
             let url = "access_rules/" + locationId + '/' + userId;
 
+            // hide template name if was prev open
+            $("#templateNameDiv").hide();
+            $("#templateNameInput").val('');
+
             $.ajax({
                 method: "GET",
                 headers: {
@@ -268,6 +297,8 @@
                 },
                 url: url,
                 success: (response) => {
+                    $("#accessRulesFor").html(response.access_rules_for);
+
                     let accessRulesHtml = '';
                     accessRulesHtml = buildTreeMenu(response.access_rules_tree, accessRulesHtml);
 
@@ -282,7 +313,7 @@
                     $('#restrictionsTemplateSelector').find('option').remove().end().append('<option value="">Load from template</option>');
 
                     $.each(response.templates, function (i, item) {
-                        $('#restrictionsTemplateSelector').append($('<option>', { 
+                        $('#restrictionsTemplateSelector').append($('<option>', {
                             value: item.TemplateName,
                             text : item.TemplateName,
                             selected: (item.TemplateName == response.RestrictionTemplate)
@@ -445,7 +476,7 @@
                     Accept: "application/json"
                 },
                 beforeSend: function(){
-                    //showLoadingOverlay();
+                    showLoadingOverlay();
                 },
                 url: url,
                 data: formData,
@@ -462,7 +493,10 @@
                     }
 
                     //window.location.assign(redirectUrl);
-
+                    hideLoadingOverlay();
+                    $('#accessRulesModal').modal('hide');
+                    $(document.body).removeClass('modal-open');
+                    $('.modal-backdrop').remove();
                 },
                 error: (response) => {
                     toastr.options.timeOut = 5000;
@@ -516,6 +550,43 @@
         function updateUserData(){
             let formData = $("#user_add_form").serializeArray();
             let locationId = $("#selected_location_id").val();
+
+            let url = "{{ route('update_user', ['locationId' => '::locationId', 'userId' => '::userId']) }}";
+            url = url.replace('::locationId', locationId);
+            url = url.replace('::userId', userId);
+
+            $.ajax({
+                method: "PUT",
+                headers: {
+                    Accept: "application/json"
+                },
+                url: url,
+                data: formData,
+                beforeSend: function(){
+                    showLoadingOverlay();
+                },
+                success: (response) => {
+                    if(response.success){
+                        toastr.options.timeOut = 5000;
+                        toastr.options.positionClass = 'toast-top-center';
+                        toastr.success('User recorded!', 'Succes:');
+
+                        window.location.assign('{{ route("users_list", ["locationId" => "0"]) }}');
+                    }
+                    else{
+                        toastr.options.timeOut = 5000;
+                        toastr.options.positionClass = 'toast-top-center';
+                        toastr.error(response.message, 'Error:');
+
+                        hideLoadingOverlay();
+                    }
+                },
+                error: (response) => {
+                    toastr.options.timeOut = 5000;
+                    toastr.options.positionClass = 'toast-top-center';
+                    toastr.error('Server error!', 'Error:');
+                }
+            });
 
             console.log(formData);
         }
@@ -599,6 +670,14 @@
         }
 
         function exportRestrictionsToTemplate(action){
+            if(action == 'cancel') {
+                $("#templateNameInput").val('');
+                $("#templateNameDiv").hide('slow');
+
+                return;
+            }
+
+            let formData = $("#access_rules_form").serializeArray();
             let TemplateName = $("#templateNameInput").val();
 
             if(TemplateName == undefined || TemplateName == ''){
@@ -609,11 +688,38 @@
                 return;
             }
 
-            $("#templateNameDiv").hide('slow');
+            $.ajax({
+                method: "POST",
+                headers: {
+                    Accept: "application/json"
+                },
+                beforeSend: function(){
+                    showLoadingOverlay();
+                },
+                url: '{{ route("access_rules_template_store") }}',
+                data: formData,
+                success: (response) => {
+                    hideLoadingOverlay();
 
-            if(action == 'cancel') return;
+                    if(response.status){
+                        toastr.options.timeOut = 5000;
+                        toastr.options.positionClass = 'toast-top-center';
+                        toastr.success('Restriction template created!', 'Succes:');
 
-            let formData = $("#access_rules_form").serializeArray();
+                        window.location.assign('{{ route("access_rules_templates") }}')
+                    }
+                    else{
+                        toastr.options.timeOut = 5000;
+                        toastr.options.positionClass = 'toast-top-center';
+                        toastr.error(response.message, 'Error:');
+                    }
+                },
+                error: (response) => {
+                    toastr.options.timeOut = 5000;
+                    toastr.options.positionClass = 'toast-top-center';
+                    toastr.error('Server error!', 'Error:');
+                }
+            });
         }
     </script>
 @endsection

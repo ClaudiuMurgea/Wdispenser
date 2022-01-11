@@ -32,4 +32,8 @@ class DatabaseConnection{
 
         return DB::connection('remoteServer');
     }
+
+    public function closeConnection(){
+        DB::disconnect('remoteServer');
+    }
 }

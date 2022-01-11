@@ -77,7 +77,10 @@
                             <div class="form-group row">
                                 <label for="edit_user_position" class="col-sm-3 col-form-label">Position</label>
                                 <div class="col-sm-8">
-                                    <input type="text" class="form-control" id="edit_user_position" name="edit_user_position" placeholder="Position">
+                                    <select class="form-control" id="edit_user_position" name="edit_user_position">
+                                        <option value="">Select Template</option>
+                                    </select>
+                                    {{-- <input type="text" class="form-control" id="edit_user_position" name="edit_user_position" placeholder="Position"> --}}
                                 </div>
                             </div>
                             <div class="form-group row">

@@ -20,8 +20,8 @@
                         <td class="col-md-2">{{ $template['TemplateName'] }}</td>
                         <td class="col-md-2">
                             <div class="btn-group btn-group-lg btn-group-sm mb-3">
-                                <input type="button" class="btn btn-sm btn-success" value="View" onclick="openViewRestrictionsTemplateModal({{ $template['TemplateName'] }}, '{{ csrf_token() }}')">
-                                <input type="button" class="btn btn-sm btn-warning" value="Edit" onclick="openEditRestrictionsTemplateModal({{ $template['TemplateName'] }}, '{{ csrf_token() }}')">
+                                {{-- <input type="button" class="btn btn-sm btn-success" value="View" onclick="openViewRestrictionsTemplateModal('{{ $template['TemplateName'] }}', '{{ csrf_token() }}')"> --}}
+                                <input type="button" class="btn btn-sm btn-warning" value="Edit" onclick="openEditRestrictionsTemplateModal('{{ $template['TemplateName'] }}', '{{ csrf_token() }}')">
                             </div>
                         </td>
                     </tr>
@@ -31,59 +31,11 @@
     </div>
 
     @include('modals.user_access_rules.uar_add_template')
+    @include('modals.user_access_rules.uar_edit_template')
 @endsection
 
 @section('scripts')
     <script type="text/javascript">
-        // $( document ).ready(function() {
-        //     let userRestrictions = sessionStorage.formDataUserRestrictions;
-
-        //     if(userRestrictions != undefined){
-        //         sessionStorage.removeItem('formDataUserRestrictions');
-
-        //         let formData = {
-        //             _token: '{{ csrf_token() }}',
-        //             userRestrictions: userRestrictions
-        //         };
-
-        //         $.ajax({
-        //             method: "POST",
-        //             headers: {
-        //                 Accept: "application/json"
-        //             },
-        //             contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
-        //             beforeSend: function(){
-        //                 //showLoadingOverlay();
-        //             },
-        //             url: '{{ route("access_rules_template_clone") }}',
-        //             data: formData,
-        //             success: (response) => {
-        //                 //console.log(response);
-
-        //                 if(response.status){
-        //                     toastr.options.timeOut = 5000;
-        //                     toastr.options.positionClass = 'toast-top-center';
-        //                     toastr.success('User restriction updated!', 'Succes:');
-        //                 }
-        //                 else{
-        //                     toastr.options.timeOut = 5000;
-        //                     toastr.options.positionClass = 'toast-top-center';
-        //                     toastr.error('Server error: ', 'Error:');
-        //                 }
-
-        //                 //window.location.assign('{{ route("users_list", ["locationId" => "0"]) }}')
-        //             },
-        //             error: (response) => {
-        //                 console.log(response);
-                        
-        //                 toastr.options.timeOut = 5000;
-        //                 toastr.options.positionClass = 'toast-top-center';
-        //                 toastr.error('Server error!', 'Error:');
-        //             }
-        //         });
-        //     }
-        // });
-
         function initTemplate(){
             $.ajax({
                 method: "GET",
@@ -126,10 +78,11 @@
             }
         }
 
-        function buildTreeMenu(data, tree) {
+        function buildTreeMenu(data, tree, selector = 'DefaultValue') {
+            // selector => DefaultValue or UserValue
             if (Object.keys(data).length > 0) {
                 if(tree == ''){
-                    tree += '<ul id="accessRulesList">';
+                    tree += '<ul id="editAccessRulesList">';
                 }
                 else{
                     tree += '<ul class="nested">';
@@ -137,7 +90,7 @@
                 $.each(data, function(key, value){
                     if(typeof value.children !== 'undefined'){
                         if(value.Type == 'ShowHide'){ // checkbox
-                            if(value.DefaultValue == 'Show'){
+                            if(value[selector] == 'Show'){
                                 tree += '<li>';
                                     tree += '<span class="caret"></span>';
                                     tree += '<input type="checkbox" checked="checked" name="' + value.f_name + '" /> ' + value.r_name + '';
@@ -160,7 +113,7 @@
                                 tree += '<ul><select name="' + value.f_name + '">';
                                 tree += '<option value="null" >Select</option>';
                                 $.each(value.additional, function(k, aditional){
-                                    if(value.DefaultValue == aditional){
+                                    if(value[selector] == aditional){
                                         tree += '<option selected="selected" value="'+aditional+'">' + aditional + '</option>';
                                     }
                                     else{
@@ -170,11 +123,11 @@
                                 tree += '</select></ul>';
                         }
 
-                        tree = buildTreeMenu(value.children, tree);
+                        tree = buildTreeMenu(value.children, tree, selector);
                     }
                     else{// no children
                         if(value.Type == 'ShowHide'){ // checkbox
-                            if(value.DefaultValue == 'Show'){ // use user
+                            if(value[selector] == 'Show'){ // use user
                                 tree += '<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
                                 tree += '<input type="checkbox" checked="checked" name="' + value.f_name + '" /> ';
                                 tree += '<span title="' + value.Help + '">' + value.r_name + '</span>';
@@ -187,22 +140,15 @@
                         }
                         else if(value.Type == 'CheckList'){ // checkbox
                             tree += '<ul>';
-                            if(value.DefaultValue == '' && false){// user restriction not set
                                 $.each(value.additional, function(k, aditional){
+                                    let cbIsChecked = '';
+                                    if(value.UserValuesArray[aditional] != 'undefined' && value.UserValuesArray[aditional]) cbIsChecked = 'checked="checked"';
+
                                     tree += '<li>';
-                                        tree += '<input type="checkbox" name="' + value.f_name + '" value="' + aditional + '" /> ';
-                                        tree += aditional;
-                                    tree += '</li>';
-                                });
-                            }
-                            else{
-                                $.each(value.additional, function(k, aditional){
-                                    tree += '<li>';
-                                        tree += '<input type="checkbox" id="' + value.f_name + aditional + '" name="' + value.f_name + '[]" value="' + aditional + '" /> ';
+                                        tree += '<input type="checkbox" ' + cbIsChecked + ' id="' + value.f_name + aditional + '" name="' + value.f_name + '[]" value="' + aditional + '" /> ';
                                         tree += '<label style="margin-bottom:0; cursor:pointer" for="' + value.f_name + aditional + '">' + aditional + '</label>';
                                     tree += '</li>';
                                 });
-                            }
                             tree += '</ul>';
                         }
                         else if(value.Type == 'Choice'){ // select
@@ -211,7 +157,7 @@
                                     tree += '<ul><select name="' + value.f_name + '">';
                                     tree += '<option value="null" >Select</option>';
                                     $.each(value.additional, function(k, aditional){
-                                        if(value.DefaultValue == aditional){
+                                        if(value[selector] == aditional){
                                             tree += '<option selected="selected" value="'+aditional+'">' + aditional + '</option>';
                                         }
                                         else{
@@ -286,7 +232,10 @@
             });
         }
 
-        function openViewRestrictionsTemplateModal(template, token){
+        function openEditRestrictionsTemplateModal(template, token){
+            let url = '{{ route("access_rules_template", ["TemplateName" => "::TemplateName"]) }}';
+            url = url.replace('::TemplateName', template);
+
             $.ajax({
                 method: "GET",
                 headers: {
@@ -295,17 +244,17 @@
                 beforeSend: function(){
                     showLoadingOverlay();
                 },
-                url: '{{ route('access_rules_defaults') }}',
+                url: url,
                 success: (response) => {
                     let accessRulesHtml = '';
-                    $('#viewAccessRulesTemplateModal').modal();
+                    $('#editAccessRulesTemplateModal').modal();
 
-                    accessRulesHtml = buildTreeMenu(response, accessRulesHtml);
+                    accessRulesHtml = buildTreeMenu(response.access_rules_tree, accessRulesHtml, 'UserValue');
 
-                    $("#accessRulesRoot").html(accessRulesHtml);
+                    $("#editAccessRulesRoot").html(accessRulesHtml);
+                    $("#templateNameEdit").val(response.template_name);
+
                     activateTreemenu();
-
-                    $("#templateNameInput").val('');
                 },
                 error: (response) => {
                     console.error(response);
@@ -316,32 +265,39 @@
             });
         }
 
-        function openEditRestrictionsTemplateModal(template, token){
+        function updateRestrictionsTemplate(){
+            let formData = $("#accessRulesEditTemplateForm").serializeArray();
+
             $.ajax({
-                method: "GET",
+                method: "PUT",
                 headers: {
                     Accept: "application/json"
                 },
                 beforeSend: function(){
                     showLoadingOverlay();
                 },
-                url: '{{ route('access_rules_defaults') }}',
+                url: '{{ route("access_rules_template_update") }}',
+                data: formData,
                 success: (response) => {
-                    let accessRulesHtml = '';
-                    $('#addAccessRulesTemplateModal').modal();
+                    hideLoadingOverlay();
 
-                    accessRulesHtml = buildTreeMenu(response, accessRulesHtml);
+                    if(response.status){
+                        toastr.options.timeOut = 5000;
+                        toastr.options.positionClass = 'toast-top-center';
+                        toastr.success('Restriction template created!', 'Succes:');
 
-                    $("#accessRulesRoot").html(accessRulesHtml);
-                    activateTreemenu();
-
-                    $("#templateNameInput").val('');
+                        //window.location.assign('{{ route("access_rules_templates") }}')
+                    }
+                    else{
+                        toastr.options.timeOut = 5000;
+                        toastr.options.positionClass = 'toast-top-center';
+                        toastr.error(response.message, 'Error:');
+                    }
                 },
                 error: (response) => {
-                    console.error(response);
-                },
-                complete: (r) => {
-                    hideLoadingOverlay();
+                    toastr.options.timeOut = 5000;
+                    toastr.options.positionClass = 'toast-top-center';
+                    toastr.error('Server error!', 'Error:');
                 }
             });
         }

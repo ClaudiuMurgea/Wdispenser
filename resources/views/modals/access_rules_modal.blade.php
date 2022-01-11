@@ -1,8 +1,8 @@
 <div class="modal fade" id="accessRulesModal" tabindex="-1" aria-labelledby="accessRulesModal" style="display: none;" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Access Rules for <span id="access_rules_for"></span></h4>
+            <div class="modal-header bg-light">
+                <h4 class="modal-title">Access Rules for <span id="accessRulesFor" class="text-info font-weight-bold"></span></h4>
                 <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
             </div>
             <div class="modal-body">
@@ -37,7 +37,7 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer" id="accessRulesModalFooter">
+            <div class="modal-footer bg-light" id="accessRulesModalFooter">
                 <button type="button" class="btn btn-outline-primary" onclick="showTemplateNameInput()">Export to template</button>
                 <div style="float: left">
                     <select class="btn btn-outline-info" id="restrictionsTemplateSelector" onchange="loadRestrictionsTemplate(this.value)">

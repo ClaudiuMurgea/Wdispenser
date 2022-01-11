@@ -34,7 +34,8 @@ Route::group(['middleware' => 'auth'], function (){
         Route::get('user/{locationId}', [\App\Http\Controllers\admin\PyramidUsersController::class, 'index'])->name('users_list');
         Route::get('user/show/{locationId}/{userId}', [\App\Http\Controllers\admin\PyramidUsersController::class, 'show'])->name('user_data');
         Route::post('user/{locationId}', [\App\Http\Controllers\admin\PyramidUsersController::class, 'store'])->name('add_user');
-        Route::post('userz/copy/action', [\App\Http\Controllers\admin\PyramidUsersController::class, 'copyAction'])->name('copy_user');
+        Route::post('users/copy/action', [\App\Http\Controllers\admin\PyramidUsersController::class, 'copyAction'])->name('copy_user');
+        Route::put('users/{locationId}/{userId}', [\App\Http\Controllers\admin\PyramidUsersController::class, 'updateAction'])->name('update_user');
         
         Route::get('user/access_rules/{locationId}/{userId}', [\App\Http\Controllers\admin\PyramidUsersController::class, 'accessRulesShow'])->name('access_rules_list');
         Route::post('user/access_rules/{locationId}/{userId}', [\App\Http\Controllers\admin\PyramidUsersController::class, 'accessRulesStore'])->name('add_user_restrictions');
@@ -42,6 +43,7 @@ Route::group(['middleware' => 'auth'], function (){
         Route::get('user/access-rules/templates', [\App\Http\Controllers\admin\AccessRulesController::class, 'accessRulesTemplates'])->name('access_rules_templates');
         Route::get('user/access-rules/template/{TemplateName}', [\App\Http\Controllers\admin\AccessRulesController::class, 'accessRulesTemplate'])->name('access_rules_template');
         Route::post('user/access-rules/new-template', [\App\Http\Controllers\admin\AccessRulesController::class, 'accessRulesTemplateStore'])->name('access_rules_template_store');
+        Route::put('user/access-rules/update-template', [\App\Http\Controllers\admin\AccessRulesController::class, 'accessRulesTemplateUpdate'])->name('access_rules_template_update');
         Route::get('user/access-rules/defaults-list', [\App\Http\Controllers\admin\AccessRulesController::class, 'accessRulesDefaults'])->name('access_rules_defaults');
         Route::post('user/access-rules/clone-template', [\App\Http\Controllers\admin\AccessRulesController::class, 'accessRulesTemplateClone'])->name('access_rules_template_clone');
     });

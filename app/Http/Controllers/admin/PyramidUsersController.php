@@ -74,7 +74,22 @@ class   PyramidUsersController extends Controller
         ];
         $targetConn = DatabaseConnection::setConnection($params);
 
+
+        // get full locations list from master
+        //$locationData = LocationMasterIp::where('LocationID', $locationId)->get()->toArray()[0] ?? [];
+
         $usersList = $targetConn->table('lmi.AdminInfo')->get()->toArray() ?? [];
+
+        foreach($usersList as &$userData){
+            $userLocations = [];
+
+            // search user in each location
+
+            $userData->locations = $userLocations;
+        }
+
+        //dd($usersList);
+        //exit;
         
         $locationsList = LocationMasterIp::orderBy('ServerType')->get();
         return view('layouts.admin.users')
@@ -104,8 +119,6 @@ class   PyramidUsersController extends Controller
 
         $userData = $targetConn->table('lmi.AdminInfo')->where('ID', $userId)->get()->toArray()[0] ?? [];
 
-        //print_r($userData->Login); exit;
-
         if(!empty($userData)){
             $adminData = [
                 'edit_admin_name'               => $userData->Login ?? '',
@@ -120,6 +133,8 @@ class   PyramidUsersController extends Controller
                 'edit_user_position'            => $userData->Position ?? '',
                 'edit_user_max_inactive_time'   => $userData->MaxInactiveMin ?? ''
             ];
+
+            $adminData['positions_options'] = (new AdminRestrictionsTemplate)->select('TemplateName')->groupBy('TemplateName')->get()->toArray();
         }
 
         return response()->json($adminData);
@@ -328,6 +343,8 @@ class   PyramidUsersController extends Controller
                             ));
                     }
                 }
+
+                $targetConn->closeConnection();
             }
         }
 
@@ -359,6 +376,8 @@ class   PyramidUsersController extends Controller
             ->get()
             ->mapWithKeys(function($item){ return [$item->Restriction => $item->RestrictionValue]; })
             ->toArray();
+
+        $userData = $sourceConn->table('lmi.AdminInfo')->where('ID', $userId)->first();
 
         if(!empty($accessRulesList)){
             foreach($accessRulesList as $accessRule){
@@ -398,8 +417,11 @@ class   PyramidUsersController extends Controller
             }
         }
 
+        $accessRulesFor = $userData->Login . ' | ' . $locationData['LocationName'];
+
         $responseArray = [
             "access_rules_tree"     => $accessRulessTree, 
+            "access_rules_for"      => $accessRulesFor, 
             "templates"             => $this->getAllTemplatesNames(), 
             "RestrictionTemplate"   => ($sourceConn->table('lmi.AdminInfo')->select('RestrictionTemplate')->where('ID', $userId)->first())->RestrictionTemplate ?? ''
         ];

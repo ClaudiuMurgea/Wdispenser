@@ -167,12 +167,12 @@ div.loading{
   }
 
   /* Remove default bullets */
-div#accessRulesRoot ul, #accessRulesList {
+div#accessRulesRoot ul, div#editAccessRulesRoot ul, #accessRulesList {
   list-style-type: none;
 }
 
 /* Remove margins and padding from the parent ul */
-#accessRulesList {
+#accessRulesList, #editAccessRulesList {
   margin: 0;
   padding: 0;
 }
