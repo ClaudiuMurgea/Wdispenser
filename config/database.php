@@ -63,7 +63,7 @@ return [
             ]) : [],
         ],
 
-        'mysql_main' => [
+        'mysql_master' => [
             'driver' => 'mysql',
             'url' => env('MASTER_DATABASE_URL'),
             'host' => env('MASTER_DB_HOST', '127.0.0.1'),
