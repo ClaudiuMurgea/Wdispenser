@@ -25,7 +25,7 @@
                     <use xlink:href="{{ asset('vendors/@coreui/icons/svg/free.svg#cil-people') }}"></use>
                 </svg> Users</a>
         </li>
-        <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="{{ route('system_settings') }}" onclick="showLoadingOverlay()">
+        <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="{{ route('settings') }}" onclick="showLoadingOverlay()">
             <svg class="c-sidebar-nav-icon">
                 <use xlink:href="{{ asset('vendors/@coreui/icons/svg/free.svg#cil-settings') }}"></use>
             </svg> Settings</a>

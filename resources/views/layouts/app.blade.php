@@ -28,12 +28,9 @@
 <!-- Optional JavaScript -->
 <!-- Popper.js first, then CoreUI JS -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-{{--<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/1.5.0/perfect-scrollbar.min.js" integrity="sha512-yUNtg0k40IvRQNR20bJ4oH6QeQ/mgs9Lsa6V+3qxTj58u2r+JiAYOhOW0o+ijuMmqCtCEg7LZRA+T4t84/ayVA==" crossorigin="anonymous"></script>--}}
 <script type="text/javascript" src="{{ asset('js/coreui.bundle.min.js') }}"></script>
-{{-- <script type="text/javascript" src="{{ asset('js/coreui-chartjs.bundle.js') }}"></script> --}}
 <script type="text/javascript" src="{{ asset('js/coreui-utils.js') }}"></script>
-{{-- <script type="text/javascript" src="{{ asset('js/coreui-main.js') }}"></script> --}}
-<script type="text/javascript" src="{{ asset('vendor/toaster/toastr.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 <script type="text/javascript" src="{{ asset('js/app.js') }}"></script>
 
 {{--@livewireScripts--}}
@@ -46,6 +43,42 @@
     function hideLoadingOverlay(){
         $( "#app-overlay" ).removeClass( "loading" ).addClass( "hidden" );
     }
+
+    @if(Session::has('message'))
+    toastr.options =
+    {
+        "closeButton" : true,
+        "progressBar" : true
+    }
+            toastr.success("{{ session('message') }}");
+    @endif
+
+    @if(Session::has('error'))
+    toastr.options =
+    {
+        "closeButton" : true,
+        "progressBar" : true
+    }
+            toastr.error("{{ session('error') }}");
+    @endif
+
+    @if(Session::has('info'))
+    toastr.options =
+    {
+        "closeButton" : true,
+        "progressBar" : true
+    }
+            toastr.info("{{ session('info') }}");
+    @endif
+
+    @if(Session::has('warning'))
+    toastr.options =
+    {
+        "closeButton" : true,
+        "progressBar" : true
+    }
+            toastr.warning("{{ session('warning') }}");
+    @endif
 </script>
 </body>
 </html>

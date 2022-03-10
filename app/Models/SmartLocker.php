@@ -17,12 +17,13 @@ class SmartLocker extends Model
         'Name',
         'Details',
         'Resource',
-        'ResourceType',
-        'ProductType',
-        'Cost',
+        'LockerNr',
+        'CostPoints',
         'CostMoney',
-        'MaxDispensableAmount',
-        'DefaultDispensableValue',
-        'Temperature'
+        'ProductType',
+        'Resource',
+        'ResourceType',
+        'ResourceVersion',
+        'isAvabile'
     ];
 }

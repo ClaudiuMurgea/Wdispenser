@@ -32,11 +32,11 @@
                             <td>{{ $product->Temperature }}</td>
                             <td>{{ $product->Cost }}</td>
                             <td>{{ $product->CostMoney }}</td>
-                            <td>{{ $product->Slot }}</td>
+                            <td>{{ $product->LockerNr }}</td>
                             <td>
                                 <div class="btn-group btn-group-lg btn-group-sm mb-3">
-                                    <a class="btn btn-sm btn-warning" role="button" aria-pressed="true" href="{{ route('smart_locker_edit', ['id' => $product->Id]) }}" >Edit</a>
-                                    <a class="btn btn-sm btn-success" role="button" aria-pressed="true" href="{{ route('smart_locker_change_product', ['id' => $product->Id]) }}" >Change product</a>
+                                    <a class="btn btn-sm btn-warning" role="button" aria-pressed="true" href="{{ route('locker_slot_edit', ['slotId' => $product->LockerNr]) }}" >Edit</a>
+                                    <a class="btn btn-sm btn-success" role="button" aria-pressed="true" href="{{ route('locker_change_product', ['slotId' => $product->LockerNr]) }}" >Change product</a>
                                 </div>
                             </td>
                         </tr>

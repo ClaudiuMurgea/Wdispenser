@@ -36,8 +36,8 @@
                             <td>{{ $product->Slot }}</td>
                             <td>
                                 <div class="btn-group btn-group-lg btn-group-sm mb-3">
-                                    <a class="btn btn-sm btn-warning" role="button" aria-pressed="true" href="{{ route('wine_dispenser_edit', ['id' => $product->Id]) }}" >Edit</a>
-                                    <a class="btn btn-sm btn-success" role="button" aria-pressed="true" href="{{ route('wine_dispenser_change_product', ['id' => $product->Id]) }}" >Change product</a>
+                                    <a class="btn btn-sm btn-warning" role="button" aria-pressed="true" href="{{ route('wine_slot_edit', ['slotId' => $product->Id]) }}" >Edit</a>
+                                    <a class="btn btn-sm btn-success" role="button" aria-pressed="true" href="{{ route('wine_change_product', ['slotId' => $product->Id]) }}" >Change product</a>
                                 </div>
                             </td>
                         </tr>

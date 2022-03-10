@@ -30,7 +30,7 @@ class ProductsController extends Controller
     }
 
     public function store(Request $request){
-        $formData = $request->all();
+        $formData = $request->all(); //dd($formData);
         $file = $request->file('product_image');
         // Get the contents of the file
         $productImageData = $file->openFile()->fread($file->getSize());
@@ -44,9 +44,11 @@ class ProductsController extends Controller
             'Resource'                  => $productImageData,
             'ResourceType'              => $productImageType,
             'ProductType'               => $formData['product_type'] ?? NULL,
-            'CostPoints'                => $formData['product_cost_points'] ?? '',
-            'CostMoney'                 => $formData['product_cost_money'] ?? 0,
-            'MaxDispensableAmount'      => $formData['mas_dsp_amount'] ?? 0,
+            'CostPointsDispenser'       => $formData['product_cost_points'] ?? '',
+            'CostMoneyDispenser'        => $formData['product_cost_money'] ?? 0,
+            'CostPointsLocker'          => $formData['product_cost_points_locker'] ?? 0,
+            'CostMoneyLocker'           => $formData['product_cost_money_locker'] ?? 0,
+            'MaxDispensableAmount'      => $formData['max_dsp_amount'] ?? 0,
             'DefaultDispensableValue'   => $formData['default_dsp_value'] ?? 0,
             'Temperature'               => $formData['product_temperature'] ?? '',
         ];
@@ -188,14 +190,12 @@ class ProductsController extends Controller
                 'isAvabile'                 => 'No'
             ];
 
-            dd($slotData);
-            
             foreach($slotsToUpdate as $slotToUpdate){
-                //$affectedRows = SmartLockerController::where('Slot', '=', $slotToUpdate)->update($slotData);
+                $affectedRows = SmartLocker::where('LockerNr', '=', $slotToUpdate)->update($slotData);
             }
 
         }
 
-        return redirect()->route('wine_dispenser');
+        return redirect()->route('smart_locker');
     }
 }

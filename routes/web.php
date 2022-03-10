@@ -41,17 +41,23 @@ Route::group(['middleware' => 'auth'], function (){
 
 
             Route::get('/wine-dispenser', [App\Http\Controllers\WineDispenserController::class, 'index'])->name('wine_dispenser');
-            Route::get('/wine-dispenser/{id}', [App\Http\Controllers\WineDispenserController::class, 'edit'])->name('wine_dispenser_edit');
-            Route::get('/wine-dispenser/change-product/{id}', [App\Http\Controllers\WineDispenserController::class, 'changeProduct'])->name('wine_dispenser_change_product');
+            Route::get('/wine-dispenser/{slotId}', [App\Http\Controllers\WineDispenserController::class, 'edit'])->name('wine_slot_edit');
+            Route::get('/wine-dispenser/{slotId}/change-product', [App\Http\Controllers\WineDispenserController::class, 'changeProduct'])->name('wine_change_product');
+            Route::post('/wine-dispenser/{slotId}/push-product', [App\Http\Controllers\WineDispenserController::class, 'pushProduct'])->name('wine_push_product');
 
             Route::get('/smart-locker', [App\Http\Controllers\SmartLockerController::class, 'index'])->name('smart_locker');
-            Route::get('/smart-locker/{id}', [App\Http\Controllers\SmartLockerController::class, 'edit'])->name('smart_locker_edit');
-            Route::get('/smart-locker/change-product', [App\Http\Controllers\SmartLockerController::class, 'edit'])->name('smart_locker_change_product');
+            Route::get('/smart-locker/{slotId}', [App\Http\Controllers\SmartLockerController::class, 'edit'])->name('locker_slot_edit');
+            Route::post('/smart-locker/{slotId}/update-slot', [App\Http\Controllers\SmartLockerController::class, 'updateSlot'])->name('locker_update_slot');
+            Route::get('/smart-locker/{slotId}/change-product', [App\Http\Controllers\SmartLockerController::class, 'changeProduct'])->name('locker_change_product');
+            Route::post('/smart-locker/{slotId}/push-product', [App\Http\Controllers\SmartLockerController::class, 'pushProduct'])->name('locker_push_product');
 
-            Route::get('/users', function(){})->name('users_list');
-            //Route::post('/users', [])->name('');
+            Route::get('/users', [App\Http\Controllers\admin\UsersController::class, 'index'])->name('users_list');
+            Route::get('/users/create', [App\Http\Controllers\admin\UsersController::class, 'create'])->name('create_user');
+            Route::post('/users', [App\Http\Controllers\admin\UsersController::class, 'store'])->name('store_user');
+            Route::get('/users/{id}', [App\Http\Controllers\admin\UsersController::class, 'edit'])->name('edit_user');
+            Route::patch('/users/{id}', [App\Http\Controllers\admin\UsersController::class, 'update'])->name('update_user');
 
-            Route::get('/system-settings', function(){})->name('system_settings');
+            Route::get('/settings', [App\Http\Controllers\admin\SettingsController::class, 'index'])->name('settings');
     });
 
     Route::group([

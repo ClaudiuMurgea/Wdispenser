@@ -34,21 +34,33 @@
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <label for="productCostPoints" class="col-sm-2 col-form-label">Cost Points</label>
+                        <label for="productCostPoints" class="col-sm-2 col-form-label">Cost Points Dispenser</label>
                         <div class="col-sm-10">
                           <input type="text" class="form-control" id="productCostPoints" name="product_cost_points">
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <label for="productCostPoints" class="col-sm-2 col-form-label">Cost Money</label>
+                        <label for="productCostMoney" class="col-sm-2 col-form-label">Cost Money Dispenser</label>
                         <div class="col-sm-10">
-                          <input type="text" class="form-control" id="productCostPoints" name="product_cost_money">
+                          <input type="text" class="form-control" id="productCostMoney" name="product_cost_money">
                         </div>
                     </div>
                     <div class="row mb-3">
+                      <label for="productCostPointsLocker" class="col-sm-2 col-form-label">Cost Points Locker</label>
+                      <div class="col-sm-10">
+                        <input type="text" class="form-control" id="productCostPointsLocker" name="product_cost_points_locker">
+                      </div>
+                  </div>
+                  <div class="row mb-3">
+                      <label for="productCostMoneyLocker" class="col-sm-2 col-form-label">Cost Money Locker</label>
+                      <div class="col-sm-10">
+                        <input type="text" class="form-control" id="productCostMoneyLocker" name="product_cost_money_locker">
+                      </div>
+                  </div>
+                    <div class="row mb-3">
                       <label for="dispensableAmount" class="col-sm-2 col-form-label">Dispensable Amount</label>
                       <div class="col-sm-10">
-                        <input type="text" class="form-control" id="dispensableAmount" name="DefaultDispensableValue">
+                        <input type="text" class="form-control" id="dispensableAmount" name="default_dsp_value">
                       </div>
                   </div>
                     <div class="row mb-3">
