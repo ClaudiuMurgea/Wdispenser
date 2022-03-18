@@ -13,8 +13,7 @@
             </div>
         </div>
     </div>
-
-
+    
     @if (count($errors) > 0)
     <div class="alert alert-danger">
         <strong>Whoops!</strong> There were some problems with your input.<br><br>
@@ -25,8 +24,6 @@
         </ul>
     </div>
     @endif
-
-
 
     {!! Form::open(array('route' => 'store_user','method'=>'POST')) !!}
     <div class="row">
@@ -63,7 +60,7 @@
         <div class="col-xs-12 col-sm-12 col-md-12">
             <div class="form-group">
                 <strong>Role:</strong>
-                {!! Form::select('roles[]', $roles,[], array('class' => 'form-control','multiple')) !!}
+                {!! Form::select('role', $roles,[], array('class' => 'form-control')) !!}
             </div>
         </div>
         <div class="col-xs-12 col-sm-12 col-md-12 text-center">

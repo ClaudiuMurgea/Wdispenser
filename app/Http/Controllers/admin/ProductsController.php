@@ -30,7 +30,22 @@ class ProductsController extends Controller
     }
 
     public function store(Request $request){
-        $formData = $request->all(); //dd($formData);
+        $this->validate($request, [
+            'product_image'         => 'required|mimes:png,jpg,jpeg|max:10000',
+            'product_name'          => 'required|max:100',
+            'product_details'       => 'required|max:500',
+            'product_cost_points'   => 'required|integer|between:0,10000',
+            'product_cost_money'    => 'required|integer|between:0,1000',
+            'product_cost_points_locker'=> 'required|integer|between:0,100000',
+            'product_cost_money_locker' => 'required|integer|between:0,10000',
+            'dispense_time'         => 'required|integer|between:0,10',
+            'dispense_amount'       => 'required|integer|between:0,50',
+            'product_temperature'   => 'required',
+            'product_type'          => 'required'
+        ]);
+
+        $formData = $request->all();
+
         $file = $request->file('product_image');
         // Get the contents of the file
         $productImageData = $file->openFile()->fread($file->getSize());
@@ -48,14 +63,11 @@ class ProductsController extends Controller
             'CostMoneyDispenser'        => $formData['product_cost_money'] ?? 0,
             'CostPointsLocker'          => $formData['product_cost_points_locker'] ?? 0,
             'CostMoneyLocker'           => $formData['product_cost_money_locker'] ?? 0,
-            'MaxDispensableAmount'      => $formData['max_dsp_amount'] ?? 0,
-            'DefaultDispensableValue'   => $formData['default_dsp_value'] ?? 0,
+            'DispenseAmount'            => $formData['dispense_time'] ?? 0,
+            'DefaultDispensableValue'   => $formData['dispense_amount'] ?? 0,
             'Temperature'               => $formData['product_temperature'] ?? '',
         ];
-
         Product::create($newProduct);
-
-        //dd($newProduct);
 
         return redirect()->route('products_list');
     }
@@ -115,11 +127,11 @@ class ProductsController extends Controller
                 'Resource'                  => $productData->Resource,
                 'ResourceType'              => $productData->ResourceType,
                 'ResourceVersion'           => 1,
-                'Cost'                      => $productData->Cost ?? 0,
-                'CostMoney'                 => $productData->CostMoney,
-                'Amount'                    => $productData->Amount ?? 0,
-                'User'                      => 'EGTS',
-                'MaxDispensableAmount'      => $productData->MaxDispensableAmount,
+                'Cost'                      => $productData->CostPointsDispenser,
+                'CostMoney'                 => $productData->CostMoneyDispenser,
+                'Amount'                    => $productData->DispenseAmount,
+                'User'                      => auth()->user()->username,
+                'MaxDispensableAmount'      => $productData->DefaultDispensableValue,
                 'DefaultDispensableValue'   => $productData->DefaultDispensableValue,
                 'Temperature'               => $productData->Temperature
             ];

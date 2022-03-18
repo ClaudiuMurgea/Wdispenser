@@ -19,9 +19,11 @@ class Product extends Model
         'Resource',
         'ResourceType',
         'ProductType',
-        'Cost',
-        'CostMoney',
-        'MaxDispensableAmount',
+        'CostPointsDispenser',
+        'CostMoneyDispenser',
+        'CostPointsLocker',
+        'CostMoneyLocker',
+        'DispenseAmount',
         'DefaultDispensableValue',
         'Temperature'
     ];
