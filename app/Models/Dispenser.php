@@ -5,25 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Product extends Model
+class Dispenser extends Model
 {
-    use HasFactory;
-
     protected $connection = 'mysql_master';
-    protected $table = 'products';
-    public $timestamps = false;
+    protected $table = 'products_list';
 
     protected $fillable = [
         'Name',
         'Details',
         'Resource',
         'ResourceType',
+        'ResourceVersion',
         'ProductType',
-        'CostPointsDispenser',
-        'CostMoneyDispenser',
-        'CostPointsLocker',
-        'CostMoneyLocker',
-        'DispenseAmount',
+        'Cost',
+        'CostMoney',
+        'Amount',
+        'User',
+        'MaxDispensableAmount',
         'DefaultDispensableValue',
         'Temperature'
     ];

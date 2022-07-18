@@ -2,17 +2,17 @@
 
 @section('content')
     <div class="container container-fluid">
-        <table class="table table-sm table-striped table-responsive-sm table-hover table-bordered">
+        <table class="table table-sm table-striped table-responsive-sm table-hover">
             <thead class="thead-dark">
                 <tr>
-                    <th>Picture</th>
-                    <th>Name</th>
-                    <th>Details</th>
-                    <th>Temperature</th>
-                    <th>Cost Points</th>
-                    <th>Cost Money</th>
-                    <th>Slot</th>
-                    <th>Action</th>
+                    <th>Picture     </th>
+                    <th>Name        </th>
+                    <th>Details     </th>
+                    <th>Temperature </th>
+                    <th>Cost Points </th>
+                    <th>Cost Money  </th>
+                    <th>Slot        </th>
+                    <th>Action      </th>
                 </tr>
             </thead>
             <tbody>
@@ -45,7 +45,7 @@
             </tbody>
         </table>
     </div>
-    
+
 @endsection
 
 @section('scripts')

@@ -24,6 +24,8 @@ class CreateUsersTable extends Migration
             $table->rememberToken();
             $table->timestamps();
         });
+
+        $this->userAdmin();
     }
 
     /**
@@ -34,5 +36,16 @@ class CreateUsersTable extends Migration
     public function down()
     {
         Schema::dropIfExists('users');
+    }
+
+    private function userAdmin()
+    {
+        $user = User::create([
+            'name' => 'SuperAdmin',
+            'email' => 'clau.murgea@gmail.com',
+            'password' => Hash::make('zxc90'),
+            'uis_admin' => true,
+            'username' => 'admin'
+        ]);
     }
 }

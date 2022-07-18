@@ -3,7 +3,7 @@
 @section('content')
     <br/>
     <div class="container container-fluid">
-        <table class="table table-sm table-striped table-responsive-sm table-hover table-bordered">
+        <table class="table table-sm table-striped table-responsive-sm table-hover">
             <thead class="thead-dark">
                 <tr>
                     <th>Picture</th>
@@ -46,7 +46,7 @@
             </tbody>
         </table>
     </div>
-    
+
 @endsection
 
 @section('scripts')

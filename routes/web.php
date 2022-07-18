@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\LogoutController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -39,7 +39,6 @@ Route::group(['middleware' => 'auth'], function (){
             Route::post('products/send-to-dispenser', [App\Http\Controllers\admin\ProductsController::class, 'sendToDispenser'])->name('send_product_to_dispenser');
             Route::post('products/send-to-locker', [App\Http\Controllers\admin\ProductsController::class, 'sendToLocker'])->name('send_product_to_locker');
 
-
             Route::get('/wine-dispenser', [App\Http\Controllers\WineDispenserController::class, 'index'])->name('wine_dispenser');
             Route::get('/wine-dispenser/{slotId}', [App\Http\Controllers\WineDispenserController::class, 'edit'])->name('wine_slot_edit');
             Route::get('/wine-dispenser/{slotId}/change-product', [App\Http\Controllers\WineDispenserController::class, 'changeProduct'])->name('wine_change_product');
@@ -56,6 +55,7 @@ Route::group(['middleware' => 'auth'], function (){
             Route::post('/users', [App\Http\Controllers\admin\UsersController::class, 'store'])->name('store_user');
             Route::get('/users/{id}', [App\Http\Controllers\admin\UsersController::class, 'edit'])->name('edit_user');
             Route::patch('/users/{id}', [App\Http\Controllers\admin\UsersController::class, 'update'])->name('update_user');
+            Route::get('/users/{user}/delete', [App\Http\Controllers\admin\UsersController::class, 'delete'])->name('delete_user');
 
             Route::get('/settings', [App\Http\Controllers\admin\SettingsController::class, 'index'])->name('settings');
     });
@@ -69,3 +69,12 @@ Route::group(['middleware' => 'auth'], function (){
     });
 });
 
+
+// Added by Claudiu
+
+Route::group(['middleware' => ['auth']], function() {
+    /**
+    * Logout Route
+    */
+    Route::get('/logout', [LogoutController::class, 'perform'])->name('logout.perform');
+ });

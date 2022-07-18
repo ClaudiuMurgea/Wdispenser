@@ -14,7 +14,6 @@ class UsersController extends Controller
 {
     public function index(){
         $users = User::all();
-
         return view('layouts.admin.users.index')->with('users', $users);
     }
     /**
@@ -27,7 +26,7 @@ class UsersController extends Controller
         $roles = ['Admin', 'User']; //Role::pluck('name','name')->all();
         return view('layouts.admin.users.create',compact('roles'));
     }
-    
+
     /**
      * Store a newly created resource in storage.
      *
@@ -36,25 +35,24 @@ class UsersController extends Controller
      */
     public function store(Request $request)
     {
-        $this->validate($request, [
+        $data = $this->validate($request, [
             'username'  => 'required|unique:users,username',
             'name'      => 'required',
             'email'     => 'required|email|unique:users,email',
-            'password'  => 'required|same:confirm-password',
+            'password'  => 'required|confirmed',
             'roles'     => 'required'
         ]);
-    
-        $input = $request->all();
-        $input['password'] = Hash::make($input['password']);
 
-        $input['is_admin'] = 0;
-        if($input['roles'] == 'Admin'){
-            $input['is_admin'] = 1;
+        $data['password'] = Hash::make($data['password']);
+
+        $data['is_admin'] = 0;
+        if($data['roles'] == 'Admin'){
+            $data['is_admin'] = 1;
         }
 
-        $user = User::create($input);
+        $user = User::create($data);
         //$user->assignRole($request->input('roles'));
-    
+
         return redirect()->route('users.index')
                         ->with('success','User created successfully');
     }
@@ -68,9 +66,10 @@ class UsersController extends Controller
     public function edit($id)
     {
         $user = User::find($id);
+
         //$roles = Role::pluck('name','name')->all();
         //$userRole = $user->roles->pluck('name','name')->all();
-    
+
         return view('layouts.admin.users.edit')->with('user', $user)->with('roles', ['Admin', 'User'])->with('userRole', []);
     }
 
@@ -83,29 +82,33 @@ class UsersController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $this->validate($request, [
+        $data = $this->validate($request, [
             'username'  => 'required|unique:users,username,'.$id,
             'name'      => 'required',
             'email'     => 'required|email|unique:users,email,'.$id,
-            'password'  => 'same:confirm-password',
+            'password'  => 'confirmed',
             'roles'     => 'required'
         ]);
-    
-        $input = $request->all();
-        if(!empty($input['password'])){ 
-            $input['password'] = Hash::make($input['password']);
+
+        if(!empty($data['password'])){
+            $data['password'] = Hash::make($data['password']);
         }else{
-            //$input = Arr::except($input,array('password'));    
-            unset($input['password']);
+            unset($data['password']);
         }
 
-        $input['is_admin'] = 0;
-        if($input['roles'] == 'Admin') $input['is_admin'] = 1;
-    
+        $data['is_admin'] = 0;
+        if($data['roles'] == 'Admin') $data['is_admin'] = 1;
+
         $user = User::find($id);
-        $user->update($input);
-    
+        $user->update($data);
+
         return redirect()->route('users_list')
                         ->with('success','User updated successfully');
+    }
+
+    public function delete(User $user) {
+        $user->delete();
+        return redirect()->route('users_list')
+                        ->with('success','User deleted successfully');
     }
 }

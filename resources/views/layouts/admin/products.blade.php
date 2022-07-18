@@ -5,8 +5,9 @@
         <a href="{{ route('add_product_form') }}" class="btn btn-success mb-1" onclick="showLoadingOverlay()"  >Add Product</a>
     </div>
     <br/>
+    test
     <div class="container-fluid">
-        <table class="table table-sm table-responsive-sm table-striped table-hover table-bordered">
+        <table class="table table-sm table-responsive-sm table-striped table-hover">
             <thead class="thead-dark">
                 <tr>
                     <th>Picture</th>
@@ -23,23 +24,19 @@
                 @foreach($products as $product)
                     <tr>
                         <td>
-                            @if($product->ResourceType != '')
-                                <img src="{{ url('/product-tumb/' . $product->Id . '/list') }}" alt="" width="100" />
-                            @else
-                                <img src="{{ asset('/img/no-image.png') }}" width="100" />
-                            @endif
+                            <img src="{{ url('/product-tumb/' . $product->Id . '/list') }}" alt="" width="100" />
                         </td>
                         {{-- <td>{{ $product->Slot }}</td> --}}
-                        <td>{{ $product->Name }}</td>
-                        <td>{{ $product->Details }}</td>
-                        <td>{{ $product->Temperature }}</td>
-                        <td>{{ $product->Cost }}</td>
-                        <td>{{ $product->CostMoney }}</td>
+                        <td>{{ $product->Name }}        </td>
+                        <td>{{ $product->Details }}     </td>
+                        <td>{{ $product->Temperature }} </td>
+                        <td>{{ $product->Cost }}        </td>
+                        <td>{{ $product->CostMoney }}   </td>
                         <td>
                             <div class="btn-group btn-sm">
-                                <a href="{{ route('edit_product', ['id' => $product->Id]) }}" class="btn btn-sm btn-warning">Edit</a>
-                                <a href="{{ route('product_to_dispenser', ['id' => $product->Id]) }}" class="btn btn-sm btn-primary">Add to dispenser</a>
-                                <a href="{{ route('product_to_locker', ['id' => $product->Id]) }}" class="btn btn-sm btn-info">Add to locker</a>
+                                <a href="{{ route('edit_product', ['id' => $product->Id]) }}" class="btn btn-sm btn-warning">           Edit            </a>
+                                <a href="{{ route('product_to_dispenser', ['id' => $product->Id]) }}" class="btn btn-sm btn-primary">   Add to dispenser</a>
+                                <a href="{{ route('product_to_locker', ['id' => $product->Id]) }}" class="btn btn-sm btn-info">         Add to locker   </a>
                             </div>
                         </td>
                     </tr>
@@ -47,7 +44,7 @@
             </tbody>
         </table>
     </div>
-    
+
 @endsection
 
 @section('scripts')

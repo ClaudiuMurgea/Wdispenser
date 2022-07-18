@@ -11,7 +11,7 @@
                     <div class="card text-white bg-dark mb-3">
                       <div class="card-header"></div>
                       <div class="card-body">
-                          
+
                       </div>
                     </div>
                   </div>
@@ -19,7 +19,7 @@
                     <div class="card text-white bg-dark mb-3">
                       <div class="card-header">Location Name</div>
                       <div class="card-body">
-                          
+
                       </div>
                     </div>
                   </div>
@@ -27,7 +27,7 @@
                     <div class="card text-white bg-dark mb-3">
                       <div class="card-header">Location Name</div>
                       <div class="card-body">
-                          
+
                       </div>
                     </div>
                   </div>
@@ -35,7 +35,7 @@
                     <div class="card text-white bg-dark mb-3">
                       <div class="card-header">Location Name</div>
                       <div class="card-body">
-                          
+
                       </div>
                     </div>
                   </div>
@@ -53,7 +53,7 @@
               </div>
             </div>
           </div>
-            
+
       </div>
     </div>
 @endsection

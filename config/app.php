@@ -162,6 +162,9 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
 
+        // Added by Claudiu
+        Barryvdh\Debugbar\ServiceProvider::class,
+
         /*
          * Package Service Providers...
          */
@@ -174,7 +177,6 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-        App\Providers\TelescopeServiceProvider::class,
     ],
 
     /*
@@ -228,6 +230,8 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
 
+        // Added by Claudiu
+        'Debugbar' => Barryvdh\Debugbar\Facade::class,
     ],
 
 ];
